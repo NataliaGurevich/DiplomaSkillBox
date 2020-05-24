@@ -1,12 +1,14 @@
 package com.skillbox.diploma.DiplomaSkillBox.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+@Data
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
@@ -14,46 +16,51 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Getter
-    @Setter
     private Long id;
 
     @Column(name = "is_moderator", columnDefinition = "false")
-    @Getter
-    @Setter
     private Boolean isModerator;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "reg_time", nullable = false)
-    @Getter
-    @Setter
     private Date regTime;
 
     @Column(name = "name", nullable = false)
-    @Getter
-    @Setter
     private String name;
 
     @Column(name = "email", nullable = false)
-    @Getter
-    @Setter
     private String email;
 
     @Column(name = "password", nullable = false)
-    @Getter
-    @Setter
     private String password;
 
-    @Getter
-    @Setter
+    @Column(name = "code")
     private String code;
 
-    @Getter
-    @Setter
+    @Column(name = "photo")
     private String photo;
+
+    @OneToMany(mappedBy = "posts", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Post> posts;
+
+    @OneToMany(mappedBy = "posts", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Post> postsForModerating;
+
+    @OneToMany(mappedBy = "post_votes", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PostVote> likes;
+
+    @OneToMany(mappedBy = "post_comments", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PostComment> comments;
 
     public User() {
         this.isModerator = false;
         this.regTime = new Date();
+        posts = new HashSet<>();
+        likes = new HashSet<>();
+        comments = new HashSet<>();
+
+        if (isModerator) {
+            postsForModerating = new HashSet<>();
+        }
     }
 }

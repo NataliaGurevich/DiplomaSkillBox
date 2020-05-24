@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <preConditions>
+        <runningAs username="natalia"/>
+    </preConditions>
+
+    <changeSet id="16" author="natalia">
+        <insert tableName="posts">
+            <column name="id" value="1"/>
+            <column name="is_active" value="true"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" value="1"/>
+            <column name="user_id" value="1"/>
+            <column name="time" value="2020-05-23 12:00:00"/>
+            <column name="title" value="First post"/>
+            <column name="text" value="Welcome to our blog!"/>
+            <column name="view_count" value="3"/>
+        </insert>
+    </changeSet>
+    <changeSet id="17" author="natalia">
+        <insert tableName="posts">
+            <column name="id" value="2"/>
+            <column name="is_active" value="true"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" value="1"/>
+            <column name="user_id" value="2"/>
+            <column name="time" value="2020-05-23 13:00:00"/>
+            <column name="title" value="Microsoft open sources GW-BASIC code"/>
+            <column name="text" value="Microsoft has uploaded the code for GW-BASIC to GitHub for historical reference and educational purposes. GW-BASIC is a BASIC interpreter, written entirely in assembly language.  According to Rich Turner, senior program manager of Windows Console and Command-Line at Microsoft, in the year this source code was created (1983), Bjarne Stroustrup was creating the first version …"/>
+            <column name="view_count" value="3"/>
+        </insert>
+    </changeSet>
+    <changeSet id="18" author="natalia">
+        <insert tableName="posts">
+            <column name="id" value="3"/>
+            <column name="is_active" value="true"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" value="1"/>
+            <column name="user_id" value="3"/>
+            <column name="time" value="2020-05-23 13:00:00"/>
+            <column name="title" value="Google and Apple release Exposure Notification API"/>
+            <column name="text" value="Google and Apple partnered up to build Exposure Notification technology that will enable apps created by public health agencies to work more accurately across Android phones and iPhones. “Exposure Notification has the specific goal of rapid notification, which is especially important to slowing the spread of the disease with a virus that can be spread …"/>
+            <column name="view_count" value="3"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

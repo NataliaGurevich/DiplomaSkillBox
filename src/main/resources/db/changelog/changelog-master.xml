@@ -19,5 +19,12 @@
     <include file="db/changelog/23-05-20_V06_create_table_post_comments.xml"></include>
     <include file="db/changelog/23-05-20_V07_create_table_captcha_codes.xml"></include>
     <include file="db/changelog/23-05-20_V08_create_table_global_settings.xml"></include>
+    <include file="db/changelog/23-05-20_V09_create_foreign_keys.xml"></include>
+    <include file="db/changelog/24-05-20_V01_add_data_to_global_settings.xml"></include>
+    <include file="db/changelog/24-05-20_V02_add_test_data_to_users.xml"></include>
+    <include file="db/changelog/24-05-20_V03_add_test_data_to_posts.xml"></include>
+    <include file="db/changelog/24-05-20_V04_add_test_data_to_post_votes.xml"></include>
+    <include file="db/changelog/24-05-20_V05_add_test_data_to_tags_tag2post.xml"></include>
+    <include file="db/changelog/24-05-20_V06_add_test_data_to_post_comments.xml"></include>
 
 </databaseChangeLog>

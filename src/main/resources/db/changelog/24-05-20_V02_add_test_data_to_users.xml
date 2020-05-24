@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <preConditions>
+        <runningAs username="natalia"/>
+    </preConditions>
+
+    <changeSet id="13" author="natalia">
+        <insert tableName="users">
+            <column name="id" value="1"/>
+            <column name="is_moderator" value="true"/>
+            <column name="reg_time" value="2020-05-23 12:00:00"/>
+            <column name="name" value="Moderator"/>
+            <column name="email" value="moderator@gmail.com"/>
+            <column name="password" value="moderator"/>
+        </insert>
+    </changeSet>
+    <changeSet id="14" author="natalia">
+        <insert tableName="users">
+            <column name="id" value="2"/>
+            <column name="reg_time" value="2020-05-23 13:00:00"/>
+            <column name="name" value="Ivan Ivanov"/>
+            <column name="email" value="ivanov@gmail.com"/>
+            <column name="password" value="ivanov"/>
+        </insert>
+    </changeSet>
+    <changeSet id="15" author="natalia">
+        <insert tableName="users">
+            <column name="id" value="3"/>
+            <column name="reg_time" value="2020-05-23 13:00:00"/>
+            <column name="name" value="Johann"/>
+            <column name="email" value="Johann@gmail.com"/>
+            <column name="password" value="johann"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

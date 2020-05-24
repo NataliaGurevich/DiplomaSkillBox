@@ -1,40 +1,32 @@
 package com.skillbox.diploma.DiplomaSkillBox.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
 
+@Data
 @Entity
 @Table(name = "post_votes")
 public class PostVote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Getter
-    @Setter
     private Long id;
 
-    @Column(name = "user_id")
-    @Getter
-    @Setter
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "post_id")
-    @Getter
-    @Setter
-    private Long postId;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "time", nullable = false)
-    @Getter
-    @Setter
     private Date time;
 
     @Column(name = "value", nullable = false)
-    @Getter
-    @Setter
     private Boolean value;
 
     public PostVote() {

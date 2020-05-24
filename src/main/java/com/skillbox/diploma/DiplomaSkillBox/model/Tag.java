@@ -1,24 +1,31 @@
 package com.skillbox.diploma.DiplomaSkillBox.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
-@NoArgsConstructor
+@Data
 @Entity
 @Table(name = "tags")
 public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Getter
-    @Setter
     private Long id;
 
     @Column(name = "name", nullable = false)
-    @Getter
-    @Setter
     private String name;
+
+    @OneToMany(
+            mappedBy = "tags",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    Set<Post> posts;
+
+    public Tag() {
+        posts = new HashSet<>();
+    }
 }
