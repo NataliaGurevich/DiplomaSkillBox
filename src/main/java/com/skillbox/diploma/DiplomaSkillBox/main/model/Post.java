@@ -1,13 +1,14 @@
-package com.skillbox.diploma.DiplomaSkillBox.model;
+package com.skillbox.diploma.DiplomaSkillBox.main.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "posts")
 public class Post {
@@ -19,9 +20,8 @@ public class Post {
     @Column(name = "is_active", nullable = false, columnDefinition = "false")
     private Boolean isActive;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "moderation_status")
-    private ModerationStatus moderationStatus;
+    @Column(name = "moderation_status", nullable = false, columnDefinition = "NEW")
+    private String moderationStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "moderator_id")
@@ -44,26 +44,9 @@ public class Post {
     @Column(name = "view_count", nullable = false)
     private Integer viewCount;
 
-    @OneToMany(mappedBy = "post_votes", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PostVote> likes;
 
-    @OneToMany(
-            mappedBy = "posts",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private Set<Tag> tags;
-
-    @OneToMany(mappedBy = "post_comments", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PostComment> comments;
-
-    public Post() {
-        this.isActive = false;
-        this.moderationStatus = ModerationStatus.NEW;
-        this.time = new Date();
-        this.viewCount = 0;
-        likes = new HashSet<>();
-        tags = new HashSet<>();
-        comments = new HashSet<>();
-    }
 }

@@ -11,14 +11,16 @@
 
     <changeSet id="2" author="natalia">
 
-        <!--        <sql>CREATE TYPE status_moderation_for_post AS ENUM ('NEW','ACCEPTED', 'DECLINED')</sql>-->
+        <!--        <sql>CREATE TYPE status_moderation_for_post AS ENUM ('NEW', 'ACCEPTED', 'DECLINED')</sql>-->
 
         <createTable tableName="posts">
             <column name="id" type="bigserial">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true"/>
             </column>
-            <column name="is_active" type="boolean" defaultValueBoolean="false"/>
-            <column name="moderation_status" type="status_moderation_for_post" defaultValue="NEW">
+            <column name="is_active" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="moderation_status" type="varchar(255)" defaultValue="NEW">
                 <constraints nullable="false"/>
             </column>
             <column name="moderator_id" type="bigint"/>
@@ -34,7 +36,9 @@
             <column name="text" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="view_count" type="bigint"/>
+            <column name="view_count" type="int">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

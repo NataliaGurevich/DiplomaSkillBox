@@ -1,4 +1,4 @@
-package com.skillbox.diploma.DiplomaSkillBox.model;
+package com.skillbox.diploma.DiplomaSkillBox.main.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

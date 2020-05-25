@@ -1,11 +1,13 @@
-package com.skillbox.diploma.DiplomaSkillBox.model;
+package com.skillbox.diploma.DiplomaSkillBox.main.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "post_votes")
 public class PostVote {
@@ -28,8 +30,4 @@ public class PostVote {
 
     @Column(name = "value", nullable = false)
     private Boolean value;
-
-    public PostVote() {
-        this.time = new Date();
-    }
 }

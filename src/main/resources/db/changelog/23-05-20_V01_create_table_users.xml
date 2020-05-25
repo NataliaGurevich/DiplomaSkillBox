@@ -12,7 +12,7 @@
     <changeSet id="1" author="natalia">
         <createTable tableName="users">
             <column name="id" type="bigserial">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true"/>
             </column>
             <column name="is_moderator" type="boolean" defaultValueBoolean="false"/>
             <column name="reg_time" type="timestamp with time zone">

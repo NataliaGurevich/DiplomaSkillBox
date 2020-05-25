@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.3.0.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/> <!-- lookup parent from com.skillbox.diploma.DiplomaSkillBox.repository -->
 	</parent>
 	<groupId>com.skillbox.diploma.</groupId>
 	<artifactId>DiplomaSkillBox</artifactId>
@@ -53,6 +53,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-52</artifactId>
+			<version>2.3.5</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
