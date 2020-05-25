@@ -14,12 +14,14 @@ public class DefaultController {
     @Autowired
     private Initialize init;
 
+    @Autowired
+
     @RequestMapping("/")
     public String index() {
         return "index";
     }
 
-    @GetMapping("/api/init/")
+    @GetMapping("/api/init")
     public ResponseEntity<Initialize> init() {
         System.out.println(init);
         return new ResponseEntity<>(init, HttpStatus.OK);
