@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="9" author="natalia">
+        <addForeignKeyConstraint baseTableName="posts"
+                                 baseColumnNames="moderator_id"
+                                 constraintName="fk_post_moderator"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="posts"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_post_user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="post_votes"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_like_user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="post_votes"
+                                 baseColumnNames="post_id"
+                                 constraintName="fk_like_post"
+                                 referencedTableName="posts"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="tag2post"
+                                 baseColumnNames="post_id"
+                                 constraintName="fk_tag2posts"
+                                 referencedTableName="posts"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="tag2post"
+                                 baseColumnNames="tag_id"
+                                 constraintName="fk_post2tags"
+                                 referencedTableName="tags"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="post_comments"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_user_comment"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="post_comments"
+                                 baseColumnNames="post_id"
+                                 constraintName="fk_post_comment"
+                                 referencedTableName="posts"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="post_comments"
+                                 baseColumnNames="parent_id"
+                                 constraintName="fk_comment_comment"
+                                 referencedTableName="post_comments"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
