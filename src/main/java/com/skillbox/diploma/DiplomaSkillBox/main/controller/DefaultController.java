@@ -1,29 +1,36 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
-import com.skillbox.diploma.DiplomaSkillBox.main.response.Initialize;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.GlobalSettingsResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.GlobalSettingsService;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@Log
 public class DefaultController {
 
     @Autowired
-    private Initialize init;
-
-    @Autowired
+    private GlobalSettingsService globalSettingsService;
 
     @RequestMapping("/")
     public String index() {
         return "index";
     }
 
-    @GetMapping("/api/init")
-    public ResponseEntity<Initialize> init() {
-        System.out.println(init);
-        return new ResponseEntity<>(init, HttpStatus.OK);
+    @GetMapping(value = "/api/init")
+    @ResponseBody
+    public InitializeResponse init() {
+        return new InitializeResponse();
+    }
+
+    @GetMapping("/api/settings")
+    @ResponseBody
+    public GlobalSettingsResponse settings() {
+        return globalSettingsService.globalSettingsResponse();
     }
 }

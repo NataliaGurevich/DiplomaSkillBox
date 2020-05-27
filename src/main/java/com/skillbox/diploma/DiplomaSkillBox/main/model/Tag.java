@@ -19,11 +19,11 @@ public class Tag {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "tag2post",
-            joinColumns = {@JoinColumn(name = "tag_id")},
-            inverseJoinColumns = {@JoinColumn(name = "post_id")}
-    )
-    Set<Post> posts;
+//    @ManyToMany(cascade = {CascadeType.ALL})
+//    @JoinTable(
+//            name = "tag2post",
+//            joinColumns = {@JoinColumn(name = "tag_id")},
+//            inverseJoinColumns = {@JoinColumn(name = "post_id")}
+//    )
+//    Set<Post> posts;
 }

@@ -2,6 +2,8 @@ package com.skillbox.diploma.DiplomaSkillBox.main.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -39,15 +41,15 @@ public class User {
     @Column(name = "photo")
     private String photo;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Post> posts;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Post> postsForModerating;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PostVote> likes;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PostComment> comments;
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+//    private Set<Post> posts;
+//
+//    @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+//    private Set<Post> postsForModerating;
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+//    private Set<PostVote> likes;
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+//    private Set<PostComment> comments;
 }

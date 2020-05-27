@@ -4,8 +4,7 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 
 @Data
-@Service
-public class Initialize {
+public class InitializeResponse {
     private String title;
     private String subtitle;
     private String phone;
@@ -13,7 +12,7 @@ public class Initialize {
     private String copyright;
     private String copyrightFrom;
 
-    public Initialize(){
+    public InitializeResponse(){
         title = "DevPub";
         subtitle = "Developer stories";
         phone = "+7 903 666-44-55";

@@ -21,8 +21,8 @@ public class PostComment {
     @JoinColumn(name = "parent_id", nullable = false)
     private PostComment parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PostComment> commentToParent;
+//    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<PostComment> commentToParent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -38,5 +38,4 @@ public class PostComment {
 
     @Column(name = "text", nullable = false)
     private String text;
-
 }
