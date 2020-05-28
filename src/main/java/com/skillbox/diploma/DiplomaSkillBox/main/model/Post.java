@@ -23,11 +23,11 @@ public class Post {
     @Column(name = "moderation_status", nullable = false, columnDefinition = "NEW")
     private String moderationStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "moderator_id")
     private User moderator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -44,9 +44,17 @@ public class Post {
     @Column(name = "view_count", nullable = false)
     private Integer viewCount;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PostVote> likes;
+//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+//    private Set<PostVote> likes;
+//
+//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+//    private Set<PostComment> comments;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PostComment> comments;
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(
+            name = "tag2post",
+            joinColumns = {@JoinColumn(name = "post_id")},
+            inverseJoinColumns = {@JoinColumn(name = "tag_id")}
+    )
+    Set<Tag> tags;
 }
