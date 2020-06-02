@@ -10,5 +10,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByName(String name);
+    User findByEmail(String email);
     List<User> findAll();
 }
