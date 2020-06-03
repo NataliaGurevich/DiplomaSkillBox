@@ -1,26 +1,23 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
-import com.skillbox.diploma.DiplomaSkillBox.main.mapper.UserMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.GlobalSettingsRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.GlobalSettingsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.GlobalSettingsService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.http.HttpRequest;
 
 import static org.springframework.http.HttpStatus.OK;
 
+@Slf4j
 @Controller
-@Log
 public class DefaultController {
 
     @Autowired
@@ -40,17 +37,19 @@ public class DefaultController {
         return new InitializeResponse();
     }
 
-    @GetMapping("/api/settings")
-    @ResponseBody
-    public GlobalSettingsResponse settings() {
-        return globalSettingsService.globalSettingsResponse();
+    @RequestMapping(value = "/api/settings", method = RequestMethod.GET)
+    public ResponseEntity settingsGet() {
+        return new ResponseEntity(globalSettingsService.globalSettingsResponse(), OK);
     }
 
-    @PostMapping("/api/settings")
-    @ResponseBody
-    public GlobalSettingsResponse settings(@RequestBody GlobalSettingsRequest globalSettingsRequest, HttpServletRequest request) {
+    @RequestMapping(value = "/api/settings", method = RequestMethod.PUT)
+    public ResponseEntity settingsPut(@RequestBody GlobalSettingsRequest globalSettingsRequest,
+                                      @CookieValue(value = "Token", defaultValue = "") String token) {
 
-        User currentUser = authService.getCurrentUser(request);
+        User currentUser = authService.getCurrentUser(token);
+
+        log.info("IN GLOBALSETTINGS POST user {}", currentUser);
+
         if (currentUser != null && currentUser.getIsModerator()) {
 
             GlobalSettingsResponse globalSettingsResponse = new GlobalSettingsResponse();
@@ -58,8 +57,11 @@ public class DefaultController {
             globalSettingsResponse.setPOST_PREMODERATION(globalSettingsRequest.isPOST_PREMODERATION());
             globalSettingsResponse.setSTATISTICS_IS_PUBLIC(globalSettingsRequest.isSTATISTICS_IS_PUBLIC());
 
+            globalSettingsService.saveGlobalSettings(globalSettingsRequest);
+
+            return new ResponseEntity(globalSettingsResponse, OK);
         }
 
-        return globalSettingsService.globalSettingsResponse();
+        return new ResponseEntity(globalSettingsService.globalSettingsResponse(), OK);
     }
 }

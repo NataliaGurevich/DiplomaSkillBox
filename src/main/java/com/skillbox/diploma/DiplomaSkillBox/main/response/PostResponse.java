@@ -2,12 +2,12 @@ package com.skillbox.diploma.DiplomaSkillBox.main.response;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Data
 public class PostResponse implements Comparable<PostResponse> {
     private Long id;
-    private Date time;
+    private Instant time;
     private UserIdNameResponse user;
     private String title;
     private String announce;

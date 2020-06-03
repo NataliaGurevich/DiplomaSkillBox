@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 
@@ -15,7 +16,7 @@ public class JwtUser implements UserDetails {
     private final String password;
     private final String email;
     private final String photo;
-    private final Date regTime;
+    private final Instant regTime;
     private final String code;
     private final Collection<? extends GrantedAuthority> authorities;
 
@@ -26,7 +27,7 @@ public class JwtUser implements UserDetails {
             String password,
             String email,
             String photo,
-            Date regTime,
+            Instant regTime,
             String code,
             Collection<? extends GrantedAuthority> authorities
     ) {
@@ -98,7 +99,7 @@ public class JwtUser implements UserDetails {
     }
 
     @JsonIgnore
-    public Date getRegTime() {
+    public Instant getRegTime() {
         return regTime;
     }
 

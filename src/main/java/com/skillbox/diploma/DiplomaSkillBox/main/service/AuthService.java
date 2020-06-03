@@ -12,10 +12,8 @@ import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUserFactory;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.HttpHeadResponseDecorator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,9 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.http.HttpResponse;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,22 +52,6 @@ public class AuthService {
 
     private static Map<String, Long> sessions = new HashMap<>();
 
-//    public User check(HttpServletRequest request) {
-//
-//        String token = Arrays.stream(request.getCookies()).
-//                filter(cookie -> cookie.getName().toLowerCase().equals("token"))
-//                .findFirst().map(cookie -> cookie.getValue()).orElse(null);
-//
-//        if (token != null && sessions.containsKey(token)) {
-//            User currentUser = userRepository.findById(sessions.get(token)).orElse(null);
-//
-//            log.info("IN check currentUser {}", currentUser);
-//
-//            return currentUser;
-//        }
-//        return null;
-//    }
-
     public User login(Login login, HttpServletRequest request, HttpServletResponse response) {
         String email = login.getEmail();
         User loggedUser = userRepository.findByEmail(email);
@@ -89,6 +70,8 @@ public class AuthService {
                 sessions.put(token, loggedUser.getId());
 
                 Cookie cookie = new Cookie("Token", token);
+                cookie.setMaxAge(7 * 24 * 60 * 60); // expires in 7 days
+                cookie.setPath("/");
                 response.addCookie(cookie);
             }
 
@@ -97,7 +80,7 @@ public class AuthService {
         return null;
     }
 
-    public void logout(){
+    public void logout() {
         sessions = new HashMap<>();
     }
 
@@ -132,7 +115,7 @@ public class AuthService {
         }
 
         if (code == null || code.length() == 0 ||
-                !captchaRepository.findCaptchaCodeBySecretCode(code).equals(captchaSecret)) {
+                !bCryptPasswordEncoder.matches(code, captchaSecret)) {
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.setMessage(WRONG_CAPTCHA);
             return new ResponseEntity(errorResponse, HttpStatus.OK);
@@ -143,7 +126,7 @@ public class AuthService {
         user.setEmail(email);
         user.setName(name);
         user.setPassword(bCryptPasswordEncoder.encode(password));
-        user.setRegTime(new Date());
+        user.setRegTime(Instant.now());
         userRepository.save(user);
 
         log.info("IN REGISTRATION user {} is registered", user);
@@ -158,13 +141,9 @@ public class AuthService {
         return captchaResponse;
     }
 
-    public User getCurrentUser (HttpServletRequest request){
+    public User getCurrentUser(String token) {
 
-        String token = Arrays.stream(request.getCookies()).
-                filter(cookie -> cookie.getName().toLowerCase().equals("token"))
-                .findFirst().map(cookie -> cookie.getValue()).orElse(null);
-
-        if (token != null && sessions.containsKey(token)) {
+        if (token != null && token.length() > 0 && sessions.containsKey(token)) {
             User currentUser = userRepository.findById(sessions.get(token)).orElse(null);
 
             log.info("IN check currentUser {}", currentUser);

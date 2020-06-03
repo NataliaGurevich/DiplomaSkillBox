@@ -11,6 +11,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
@@ -26,8 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Base64;
-import java.util.Date;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -42,20 +43,12 @@ public class ApiAuthController {
     @Autowired
     private CaptchaRepository captchaRepository;
 
-//    @Autowired
-//    private AuthenticationManager authenticationManager;
-
-//    @Autowired
-//    private JwtTokenProvider jwtTokenProvider;
-
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
-//    private static Map<String, Long> sessions = new HashMap<>();
-
     @GetMapping("/check")
-    public ResponseEntity getCheck(HttpServletRequest request, HttpServletResponse response) {
-        User currentUser = authService.getCurrentUser(request);
+    public ResponseEntity getCheck(@CookieValue(value = "Token", defaultValue = "") String token) {
+        User currentUser = authService.getCurrentUser(token);
         if (currentUser != null) {
             AuthResponseTrue authResponse = new AuthResponseTrue();
             authResponse.setUser(UserMapper.converterToFullName(currentUser));
@@ -73,15 +66,6 @@ public class ApiAuthController {
         User loggedUser = authService.login(loginRequest, request, response);
 
         if (loggedUser != null) {
-
-//            Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-//                    loginRequest.getEmail(), loginRequest.getPassword()));
-//
-//            String token = jwtTokenProvider.createToken(JwtUserFactory.create(loggedUser));
-//            sessions.put(token, loggedUser.getId());
-//
-//            Cookie cookie = new Cookie("Token", token);
-//            response.addCookie(cookie);
 
             AuthResponseTrue authResponse = new AuthResponseTrue();
             authResponse.setUser(UserMapper.converterToFullName(loggedUser));
@@ -101,7 +85,7 @@ public class ApiAuthController {
     @GetMapping("/logout")
     public RedirectView logout() {
         authService.logout();
-        return new RedirectView("/");
+        return new RedirectView("/posts/recent");
     }
 
     @GetMapping("/captcha")
@@ -122,7 +106,7 @@ public class ApiAuthController {
         String imageString = Base64.getEncoder().encodeToString(imageBytes);
 
         CaptchaCode captchaCode = new CaptchaCode();
-        captchaCode.setTime(new Date());
+        captchaCode.setTime(Instant.now());
         captchaCode.setCode(token);
         captchaCode.setSecretCode(secret);
         captchaRepository.save(captchaCode);

@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
@@ -16,9 +16,8 @@ public class CaptchaCode {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "time", nullable = false)
-    private Date time;
+    private Instant time;
 
     @Column(name = "code", nullable = false)
     private String code;

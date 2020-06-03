@@ -2,12 +2,9 @@ package com.skillbox.diploma.DiplomaSkillBox.main.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.Set;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
@@ -22,9 +19,8 @@ public class User {
     @Column(name = "is_moderator", columnDefinition = "false")
     private Boolean isModerator;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "reg_time", nullable = false)
-    private Date regTime;
+    private Instant regTime;
 
     @Column(name = "name", nullable = false)
     private String name;

@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User register(User user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setRegTime(new Date());
+        user.setRegTime(Instant.now());
         user.setIsModerator(false);
 
         User registeredUser = userRepository.save(user);
@@ -93,13 +94,5 @@ public class UserServiceImpl implements UserService {
 
         log.info("IN delete - user with id: {} successfully deleted", id);
 
-    }
-
-    public User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        log.info("CURRENT_USER - {} -> {}", userRepository.findByEmail(email), email);
-
-        return userRepository.findByEmail(email);
     }
 }

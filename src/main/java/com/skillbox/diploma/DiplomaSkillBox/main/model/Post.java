@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Set;
 
 @Data
@@ -31,9 +31,8 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "time", nullable = false)
-    private Date time;
+    private Instant time;
 
     @Column(name = "title", nullable = false)
     private String title;

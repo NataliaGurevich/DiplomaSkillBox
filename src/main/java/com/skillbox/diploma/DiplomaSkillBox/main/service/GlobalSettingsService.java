@@ -2,16 +2,17 @@ package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.GlobalSettings;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.GlobalSettingsRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.GlobalSettingsResponse;
 import lombok.Data;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Log
+@Slf4j
 @Data
 @Service
 @Transactional
@@ -20,7 +21,7 @@ public class GlobalSettingsService {
     @Autowired
     GlobalSettingsRepository globalSettingsRepository;
 
-    public GlobalSettingsResponse globalSettingsResponse(){
+    public GlobalSettingsResponse globalSettingsResponse() {
 
         boolean MULTIUSER_MODE = false;
         boolean POST_PREMODERATION = true;
@@ -50,8 +51,33 @@ public class GlobalSettingsService {
         globalSettingsResponse.setPOST_PREMODERATION(POST_PREMODERATION);
         globalSettingsResponse.setSTATISTICS_IS_PUBLIC(STATISTICS_IS_PUBLIC);
 
-        log.info("[" + globalSettingsResponse.toString() + "]");
+        log.info("IN GLOBALSETTINGS {}", globalSettingsResponse);
 
         return globalSettingsResponse;
+    }
+
+    public void saveGlobalSettings(GlobalSettingsRequest globalSettingsRequest) {
+
+        List<GlobalSettings> globalSettings = globalSettingsRepository.findAll();
+
+        if (globalSettings != null) {
+
+            for (GlobalSettings settings : globalSettings) {
+                switch (settings.getCode()) {
+                    case "MULTIUSER_MODE":
+                        settings.setValue(globalSettingsRequest.isMULTIUSER_MODE() ? "YES" : "NO");
+                        globalSettingsRepository.save(settings);
+                        break;
+                    case "POST_PREMODERATION":
+                        settings.setValue(globalSettingsRequest.isPOST_PREMODERATION() ? "YES" : "NO");
+                        globalSettingsRepository.save(settings);
+                        break;
+                    case "STATISTICS_IS_PUBLIC":
+                        settings.setValue(globalSettingsRequest.isSTATISTICS_IS_PUBLIC() ? "YES" : "NO");
+                        globalSettingsRepository.save(settings);
+                        break;
+                }
+            }
+        }
     }
 }
