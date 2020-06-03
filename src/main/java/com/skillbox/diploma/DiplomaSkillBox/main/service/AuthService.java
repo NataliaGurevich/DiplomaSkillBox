@@ -69,6 +69,18 @@ public class AuthService {
                 String token = jwtTokenProvider.createToken(JwtUserFactory.create(loggedUser));
                 sessions.put(token, loggedUser.getId());
 
+                Cookie[] cookies = request.getCookies();
+                if (cookies != null) {
+                    Cookie cookie = Arrays.stream(cookies).filter(c -> c.getName().toLowerCase().equals("token"))
+                            .findFirst().orElse(null);
+
+                    if (cookie != null){
+                        cookie.setMaxAge(0);
+                        cookie.setPath("/");
+                        response.addCookie(cookie);
+                    }
+                }
+
                 Cookie cookie = new Cookie("Token", token);
                 cookie.setMaxAge(7 * 24 * 60 * 60); // expires in 7 days
                 cookie.setPath("/");
@@ -142,6 +154,8 @@ public class AuthService {
     }
 
     public User getCurrentUser(String token) {
+
+        log.info("IN check session {}, token {}", sessions.get(token), token);
 
         if (token != null && token.length() > 0 && sessions.containsKey(token)) {
             User currentUser = userRepository.findById(sessions.get(token)).orElse(null);

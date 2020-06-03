@@ -48,7 +48,13 @@ public class ApiAuthController {
 
     @GetMapping("/check")
     public ResponseEntity getCheck(@CookieValue(value = "Token", defaultValue = "") String token) {
+
+        log.info("IN getCheck token {}", token);
+
         User currentUser = authService.getCurrentUser(token);
+
+        log.info("IN getCheck {}, token {}", currentUser, token);
+
         if (currentUser != null) {
             AuthResponseTrue authResponse = new AuthResponseTrue();
             authResponse.setUser(UserMapper.converterToFullName(currentUser));

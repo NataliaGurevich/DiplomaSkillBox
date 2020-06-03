@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
@@ -26,6 +24,12 @@ public class DefaultController {
     @Autowired
     private AuthService authService;
 
+    private final InitializeResponse init;
+
+    public DefaultController(InitializeResponse init) {
+        this.init = init;
+    }
+
     @RequestMapping("/")
     public String index() {
         return "index";
@@ -34,7 +38,7 @@ public class DefaultController {
     @GetMapping(value = "/api/init")
     @ResponseBody
     public InitializeResponse init() {
-        return new InitializeResponse();
+        return init;
     }
 
     @RequestMapping(value = "/api/settings", method = RequestMethod.GET)
