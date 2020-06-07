@@ -1,13 +1,19 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.mapper;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.UserIdNamePhotoResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.UserIdNameResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.UserResponse;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Data
 public class UserMapper {
+
+    @Autowired
+    private PostRepository postRepository;
+
     private Long id;
     private String name;
 
@@ -22,7 +28,7 @@ public class UserMapper {
         return userResponse;
     }
 
-    public static UserResponse converterToFullName(User user) {
+    public static UserResponse converterToFullName(User user, int count) {
         UserResponse userResponse = new UserResponse();
 
         userResponse.setId(user.getId());
@@ -31,8 +37,7 @@ public class UserMapper {
         userResponse.setEmail(user.getEmail());
         userResponse.setIsModerator(user.getIsModerator());
         userResponse.setIsSettings(user.getIsModerator());
-        int count = 56;
-        userResponse.setModerationCount(user.getIsModerator() ? count : 0);
+        userResponse.setModerationCount(count);
 
         return userResponse;
     }

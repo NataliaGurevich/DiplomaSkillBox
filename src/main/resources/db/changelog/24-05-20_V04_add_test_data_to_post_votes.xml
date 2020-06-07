@@ -22,5 +22,12 @@
             <column name="time" value="2020-05-23 14:00:00"/>
             <column name="value" value="true"/>
         </insert>
+        <insert tableName="post_votes">
+            <column name="id" value="3"/>
+            <column name="user_id" value="2"/>
+            <column name="post_id" value="3"/>
+            <column name="time" value="2020-05-23 14:00:00"/>
+            <column name="value" value="true"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>

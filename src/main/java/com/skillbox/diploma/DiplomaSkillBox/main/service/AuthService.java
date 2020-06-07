@@ -6,7 +6,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtTokenProvider;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUserFactory;
 import lombok.Data;
@@ -109,26 +109,26 @@ public class AuthService {
         final String WRONG_CAPTCHA = "Код с картинки введен неверно";
 
         if (userRepository.findByEmail(email) != null) {
-            ErrorResponse errorResponse = new ErrorResponse();
+            ResultResponse errorResponse = new ResultResponse();
             errorResponse.setMessage(WRONG_EMAIL);
             return new ResponseEntity(errorResponse, HttpStatus.OK);
         }
 
         if (name == null || name.length() > 255) {
-            ErrorResponse errorResponse = new ErrorResponse();
+            ResultResponse errorResponse = new ResultResponse();
             errorResponse.setMessage(WRONG_NAME);
             return new ResponseEntity(errorResponse, HttpStatus.OK);
         }
 
         if (password.length() < 6) {
-            ErrorResponse errorResponse = new ErrorResponse();
+            ResultResponse errorResponse = new ResultResponse();
             errorResponse.setMessage(WRONG_PASSWORD);
             return new ResponseEntity(errorResponse, HttpStatus.OK);
         }
 
         if (code == null || code.length() == 0 ||
                 !bCryptPasswordEncoder.matches(code, captchaSecret)) {
-            ErrorResponse errorResponse = new ErrorResponse();
+            ResultResponse errorResponse = new ResultResponse();
             errorResponse.setMessage(WRONG_CAPTCHA);
             return new ResponseEntity(errorResponse, HttpStatus.OK);
         }

@@ -5,8 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PostsResponse {
-    private int count;
-    private List<PostResponse> posts;
-
+public class PostsResponse <T>{
+    private long count;
+    private List<T> posts;
 }

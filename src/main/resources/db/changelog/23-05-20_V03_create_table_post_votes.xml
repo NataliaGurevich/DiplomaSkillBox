@@ -8,7 +8,7 @@
     <changeSet id="3" author="natalia">
         <createTable tableName="post_votes">
             <column name="id" type="bigserial">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true"/>
             </column>
             <column name="user_id" type="bigint">
                 <constraints nullable="false"/>

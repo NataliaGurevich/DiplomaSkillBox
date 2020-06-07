@@ -43,17 +43,26 @@ public class Post {
     @Column(name = "view_count", nullable = false)
     private Integer viewCount;
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch=FetchType.EAGER)
-//    private Set<PostVote> likes;
-//
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch=FetchType.EAGER)
-//    private Set<PostComment> comments;
+    //
+//    @OneToMany(mappedBy = "post",  fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Transient
+    private Set<PostVote> likes;
 
-    @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "tag2post",
-            joinColumns = {@JoinColumn(name = "post_id")},
-            inverseJoinColumns = {@JoinColumn(name = "tag_id")}
-    )
-    Set<Tag> tags;
+    @Transient
+    private Set<PostComment> comments;
+
+    //    @ManyToMany(cascade = {CascadeType.ALL})
+//    @JoinTable(name = "tag2post",
+//            joinColumns = @JoinColumn(name = "post_id"),
+//            inverseJoinColumns = @JoinColumn(name = "tag_id")
+//    )
+//    @OneToMany(mappedBy = "posts")
+    @Transient
+    Set<Tag> tagsForPost;
+
+    @Transient
+    Integer likeCount;
+
+    @Transient
+    Integer commentCount;
 }
