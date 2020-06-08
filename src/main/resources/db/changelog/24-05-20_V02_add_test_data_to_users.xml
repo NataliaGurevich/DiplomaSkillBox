@@ -12,7 +12,7 @@
             <column name="reg_time" value="2020-05-23 12:00:00"/>
             <column name="name" value="Moderator"/>
             <column name="email" value="moderator@gmail.com"/>
-            <column name="password" value="moderator"/>
+            <column name="password" value="$2a$04$3491pKIseBCKTmMDNdrkvuU5tpNwgwQm4p8p1Qlw/cx1PjH7Gs1cq"/>
         </insert>
     </changeSet>
     <changeSet id="14" author="natalia">
@@ -21,7 +21,7 @@
             <column name="reg_time" value="2020-05-23 13:00:00"/>
             <column name="name" value="Ivan Ivanov"/>
             <column name="email" value="ivanov@gmail.com"/>
-            <column name="password" value="ivanov"/>
+            <column name="password" value="$2y$12$BRweAnMWaiRSmh6D80L4g.P1eBl.F6kTVDgvfLY10kG5306oTCdc2"/>
         </insert>
     </changeSet>
     <changeSet id="15" author="natalia">
@@ -30,7 +30,7 @@
             <column name="reg_time" value="2020-05-23 13:00:00"/>
             <column name="name" value="Johann"/>
             <column name="email" value="Johann@gmail.com"/>
-            <column name="password" value="johann"/>
+            <column name="password" value="$2y$12$rRVfDDVflA6FA/0wzpgEbOeanC6J4TNLyQ5AcLcqq0J2MiTEG8MTa"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

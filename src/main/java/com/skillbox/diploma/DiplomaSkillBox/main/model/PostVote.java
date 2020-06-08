@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Date;
 
 @Data
@@ -24,9 +25,8 @@ public class PostVote {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "time", nullable = false)
-    private Date time;
+    private Instant time;
 
     @Column(name = "value", nullable = false)
     private Boolean value;
