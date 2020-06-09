@@ -37,6 +37,9 @@ public class ApiPostController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private PostServiceBySearch postServiceBySearch;
+
     @GetMapping("")
     public ResponseEntity getAllPost(@RequestParam(value = "offset", defaultValue = "0") int offset,
                                      @RequestParam(value = "limit", defaultValue = "10") int limit,
@@ -92,6 +95,14 @@ public class ApiPostController {
         else {
             return new ResponseEntity(null, HttpStatus.OK);
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity getPostBySearch(@RequestParam(value = "offset", defaultValue = "0") int offset,
+                                          @RequestParam(value = "limit", defaultValue = "10") int limit,
+                                          @RequestParam(value = "query", defaultValue = "", required = false) String querySearch) throws InterruptedException {
+
+        return new ResponseEntity(postServiceBySearch.getPostsBySearch(offset, limit, querySearch.trim()), HttpStatus.OK);
     }
 }
 

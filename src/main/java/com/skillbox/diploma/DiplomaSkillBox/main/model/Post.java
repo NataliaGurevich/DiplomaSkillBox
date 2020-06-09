@@ -2,6 +2,9 @@ package com.skillbox.diploma.DiplomaSkillBox.main.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.Indexed;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -10,6 +13,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @Entity
+@Indexed
 @Table(name = "posts")
 public class Post {
 
@@ -21,6 +25,7 @@ public class Post {
     private Boolean isActive;
 
     @Column(name = "moderation_status", nullable = false, columnDefinition = "NEW")
+    @Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
     private String moderationStatus;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -32,12 +37,17 @@ public class Post {
     private User user;
 
     @Column(name = "time", nullable = false)
+    @Field(analyze=Analyze.NO)
+    @DateBridge(resolution =Resolution.MILLISECOND)
+    @SortableField
     private Instant time;
 
     @Column(name = "title", nullable = false)
+    @Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
     private String title;
 
     @Column(name = "text", nullable = false)
+    @Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
     private String text;
 
     @Column(name = "view_count", nullable = false)
