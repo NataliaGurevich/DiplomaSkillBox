@@ -6,10 +6,8 @@ import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorListResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtTokenProvider;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUserFactory;
 import lombok.Data;
@@ -77,7 +75,7 @@ public class AuthService {
                     Cookie cookie = Arrays.stream(cookies).filter(c -> c.getName().toLowerCase().equals("token"))
                             .findFirst().orElse(null);
 
-                    if (cookie != null){
+                    if (cookie != null) {
                         cookie.setMaxAge(0);
                         cookie.setPath("/");
                         response.addCookie(cookie);
@@ -119,20 +117,20 @@ public class AuthService {
 
         if (name == null || name.length() > 255) {
             ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setEmail(WRONG_NAME);
+            errorMessage.setName(WRONG_NAME);
             return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
         }
 
         if (password.length() < 6) {
             ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setEmail(WRONG_PASSWORD);
+            errorMessage.setPassword(WRONG_PASSWORD);
             return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
         }
 
         if (code == null || code.length() == 0 ||
                 !bCryptPasswordEncoder.matches(code, captchaSecret)) {
             ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setEmail(WRONG_CAPTCHA);
+            errorMessage.setCaptcha(WRONG_CAPTCHA);
             return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
 
         }

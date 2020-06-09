@@ -1,16 +1,14 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
-import com.skillbox.diploma.DiplomaSkillBox.main.mapper.CommentMapper;
-import com.skillbox.diploma.DiplomaSkillBox.main.mapper.PostMapper;
-import com.skillbox.diploma.DiplomaSkillBox.main.mapper.UserMapper;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.*;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.Tag;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.TagToPost;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.*;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +17,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Data

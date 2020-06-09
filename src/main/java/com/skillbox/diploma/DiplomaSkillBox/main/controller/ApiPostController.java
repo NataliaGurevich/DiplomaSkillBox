@@ -5,12 +5,10 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -84,15 +82,14 @@ public class ApiPostController {
     @GetMapping("/moderation")
     public ResponseEntity getPostModeration(@RequestParam(value = "offset", defaultValue = "0") int offset,
                                             @RequestParam(value = "limit", defaultValue = "10") int limit,
-                                            @RequestParam(value = "status", defaultValue = "new")  String status,
+                                            @RequestParam(value = "status", defaultValue = "new") String status,
                                             @CookieValue(value = "Token", defaultValue = "") String token) {
         User currentUser = authService.getCurrentUser(token);
         if (currentUser.getIsModerator()) {
             log.info("MODERATION {}", currentUser);
             return new ResponseEntity(postServiceModeration.getSetPosts(offset, limit, status.toUpperCase(), currentUser),
                     HttpStatus.OK);
-        }
-        else {
+        } else {
             return new ResponseEntity(null, HttpStatus.OK);
         }
     }

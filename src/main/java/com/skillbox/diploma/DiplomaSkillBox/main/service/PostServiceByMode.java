@@ -42,7 +42,7 @@ public class PostServiceByMode {
 
     public PostsResponse getSetPosts(int offset, int limit, String mode) {
 
-        int currentPage = offset/limit;
+        int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
         List<PostResponse> posts = new ArrayList<>();
         Page<Post> postPage;
@@ -79,8 +79,9 @@ public class PostServiceByMode {
             if (postList != null) {
 
                 count = postList.stream().peek(p -> {
-                            Integer countComment = postCommentRepository.findCountComments(p.getId()).orElse(0);
-                            p.setCommentCount(countComment); }).count();
+                    Integer countComment = postCommentRepository.findCountComments(p.getId()).orElse(0);
+                    p.setCommentCount(countComment);
+                }).count();
 
                 postList = postList.stream().peek(p -> {
                             Integer countComment = postCommentRepository.findCountComments(p.getId()).orElse(0);
@@ -101,12 +102,14 @@ public class PostServiceByMode {
             if (postList != null) {
 
                 count = postList.stream().peek(p -> {
-                            Integer countLike = postVoteRepository.findCountLikes(p.getId()).orElse(0);
-                            p.setLikeCount(countLike); }).count();
+                    Integer countLike = postVoteRepository.findCountLikes(p.getId()).orElse(0);
+                    p.setLikeCount(countLike);
+                }).count();
 
                 postList = postList.stream().peek(p -> {
                             Integer countLike = postVoteRepository.findCountLikes(p.getId()).orElse(0);
-                            p.setLikeCount(countLike); }
+                            p.setLikeCount(countLike);
+                        }
                 ).collect(Collectors.toList());
 
                 postList = postList.stream().sorted((p1, p2) -> p2.getLikeCount().compareTo(p1.getLikeCount())).collect(Collectors.toList());
@@ -130,7 +133,7 @@ public class PostServiceByMode {
 
     public PostsResponse getAllPostByDate(int offset, int limit, Instant instant) {
 
-        int currentPage = offset/limit;
+        int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
         Page<Post> postPage = postRepository.findAllPostByDate(instant, paging);
         long count = postPage.getTotalElements();
