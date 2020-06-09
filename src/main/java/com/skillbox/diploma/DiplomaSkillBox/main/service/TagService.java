@@ -1,6 +1,7 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.mapper.TagMapper;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Tag;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.TagRepository;
@@ -40,16 +41,21 @@ public class TagService {
 
         if (tags != null) {
             for (Tag tag : tags) {
-                int countPostsProTags = tagToPostRepository.findCountPostsProTag(tag.getId()).orElse(0);
-                double weight = countPostsProTags / (double)countPosts;
+                List<Post> posts = tagToPostRepository.findPostsProTag(tag);
 
-                log.info("TAG {}, weight {}", tag.getName(), countPostsProTags);
+                int countPostsProTags = posts == null ? 0 : (int)posts.stream()
+                        .filter(p -> p.getModerationStatus().equalsIgnoreCase("ACCEPTED")
+                                && p.getIsActive()).count();
+                double weight = (double)countPostsProTags / (double)countPosts;
+
+                log.info("TAG {}, TotalPosts {}, PostsProTag {}, weight {}", tag.getName(), countPosts, countPostsProTags, weight);
 
                 tagsWeights.add(TagMapper.converter(tag, weight));
             }
         }
         return tagsWeights;
     }
+
 
     public TagsResponse getAllTags() {
         TagsResponse tagsResponse = new TagsResponse();

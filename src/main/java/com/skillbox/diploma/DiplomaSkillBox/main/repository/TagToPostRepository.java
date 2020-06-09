@@ -21,6 +21,9 @@ public interface TagToPostRepository extends PagingAndSortingRepository<TagToPos
     @Query(value = "SELECT COUNT(*) FROM tag2post WHERE tag_id=?1", nativeQuery = true)
     Optional<Integer> findCountPostsProTag(Long id);
 
+    @Query("SELECT post FROM TagToPost t WHERE t.tag=?1")
+    List<Post> findPostsProTag(Tag tag);
+
     @Query("SELECT post FROM TagToPost t WHERE t.tag = ?1")
     Page<Post> findPostByTag(Tag tag, Pageable paging);
 }
