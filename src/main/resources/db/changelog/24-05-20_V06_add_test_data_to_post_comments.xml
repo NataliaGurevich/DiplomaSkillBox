@@ -23,4 +23,22 @@
             <column name="text" value="It is interesting!"/>
         </insert>
     </changeSet>
+    <changeSet id="32" author="natalia">
+        <insert tableName="post_comments">
+            <column name="id" value="3"/>
+            <column name="post_id" value="2"/>
+            <column name="user_id" value="3"/>
+            <column name="time" value="2020-06-23 15:00:00"/>
+            <column name="text" value="Ich bin einverstanden )"/>
+        </insert>
+    </changeSet>
+    <changeSet id="33" author="natalia">
+        <insert tableName="post_comments">
+            <column name="id" value="4"/>
+            <column name="post_id" value="2"/>
+            <column name="user_id" value="3"/>
+            <column name="time" value="2020-06-23 15:10:00"/>
+            <column name="text" value="cool )"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

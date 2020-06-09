@@ -13,8 +13,8 @@
             <column name="moderator_id" value="1"/>
             <column name="user_id" value="1"/>
             <column name="time" value="2020-05-23 12:00:00"/>
-            <column name="title" value="First post"/>
-            <column name="text" value="Welcome to our blog!"/>
+            <column name="title" value="BigData — Hadoop!"/>
+            <column name="text" value="Идея родилась в 2004 году: Google публикует работу, в которой рассказывает о технологии BigTable и MapReduce (на которой сейчас держатся NoSQL-базы данных). В 2006 Yahoo выпускает открытую реализацию и дает ей имя Hadoop. В 2010 году была создана экосистема технологий, делающая  Hadoop применимой и популярной. Зачем нужен Hadoop? Объем данных за последние несколько лет растет с большой скоростью и обещает продолжать в том же духе. Именно это и послужило предпосылкой для написания Google вышеупомянутой работы: стандартные базы данных больше не могли поддерживать работоспособность при таком темпе."/>
             <column name="view_count" value="3"/>
         </insert>
     </changeSet>
@@ -26,9 +26,9 @@
             <column name="moderator_id" value="1"/>
             <column name="user_id" value="2"/>
             <column name="time" value="2020-05-23 13:00:00"/>
-            <column name="title" value="Microsoft open sources GW-BASIC code"/>
+            <column name="title" value="Hibernate ORM"/>
             <column name="text"
-                    value="Microsoft has uploaded the code for GW-BASIC to GitHub for historical reference and educational purposes. GW-BASIC is a BASIC interpreter, written entirely in assembly language.  According to Rich Turner, senior program manager of Windows Console and Command-Line at Microsoft, in the year this source code was created (1983), Bjarne Stroustrup was creating the first version …"/>
+                    value="Hibernate ORM enables developers to more easily write applications whose data outlives the application process. As an Object/Relational Mapping (ORM) framework, Hibernate is concerned with data persistence as it applies to relational databases (via JDBC). Unfamiliar with the notion of ORM?"/>
             <column name="view_count" value="3"/>
         </insert>
     </changeSet>

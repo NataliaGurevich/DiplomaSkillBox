@@ -8,13 +8,13 @@
     <changeSet id="21" author="natalia">
         <insert tableName="tags">
             <column name="id" value="1"/>
-            <column name="name" value="Moderator"/>
+            <column name="name" value="HADOOP"/>
         </insert>
     </changeSet>
     <changeSet id="22" author="natalia">
         <insert tableName="tags">
             <column name="id" value="2"/>
-            <column name="name" value="NEWS"/>
+            <column name="name" value="HIBERNATE"/>
         </insert>
     </changeSet>
     <changeSet id="23" author="natalia">
@@ -34,14 +34,14 @@
         <insert tableName="tag2post">
             <column name="id" value="2"/>
             <column name="post_id" value="1"/>
-            <column name="tag_id" value="2"/>
+            <column name="tag_id" value="3"/>
         </insert>
     </changeSet>
     <changeSet id="26" author="natalia">
         <insert tableName="tag2post">
             <column name="id" value="3"/>
             <column name="post_id" value="2"/>
-            <column name="tag_id" value="1"/>
+            <column name="tag_id" value="2"/>
         </insert>
     </changeSet>
     <changeSet id="27" author="natalia">
@@ -54,7 +54,7 @@
     <changeSet id="28" author="natalia">
         <insert tableName="tag2post">
             <column name="id" value="5"/>
-            <column name="post_id" value="3"/>
+            <column name="post_id" value="2"/>
             <column name="tag_id" value="1"/>
         </insert>
     </changeSet>

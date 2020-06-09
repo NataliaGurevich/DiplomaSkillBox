@@ -7,12 +7,16 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.TagResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.UserIdNamePhotoResponse;
 import lombok.Data;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Date;
 
 @Data
 public class CommentMapper {
     private Long id;
-    private Date time;
+    private String time;
     private String text;
     private UserIdNamePhotoResponse user;
 
@@ -20,9 +24,17 @@ public class CommentMapper {
     }
 
     public static CommentResponse converter(PostComment comment) {
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofLocalizedDateTime( FormatStyle.MEDIUM)
+                        .withZone( ZoneId.systemDefault() );
+
+        Instant instant = comment.getTime();
+        String output = formatter.format( instant );
+
         CommentResponse commentResponse = new CommentResponse();
         commentResponse.setId(comment.getId());
-        commentResponse.setTime(comment.getTime());
+        commentResponse.setTime(output);
         commentResponse.setText(comment.getText());
         commentResponse.setUser(UserMapper.converterToNameIdNamePhoto(comment.getUser()));
 

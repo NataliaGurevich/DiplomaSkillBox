@@ -8,7 +8,7 @@
     <changeSet id="5" author="natalia">
         <createTable tableName="tag2post">
             <column name="id" type="bigserial">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true"/>
             </column>
             <column name="post_id" type="bigint">
                 <constraints nullable="false"/>

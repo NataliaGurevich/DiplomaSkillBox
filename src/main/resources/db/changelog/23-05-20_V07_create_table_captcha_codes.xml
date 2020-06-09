@@ -8,7 +8,7 @@
     <changeSet id="7" author="natalia">
         <createTable tableName="captcha_codes">
             <column name="id" type="bigserial">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true"/>
             </column>
             <column name="time" type="timestamp with time zone">
                 <constraints nullable="false"/>

@@ -25,5 +25,6 @@ public class Tag {
 //            joinColumns = {@JoinColumn(name = "tag_id")},
 //            inverseJoinColumns = {@JoinColumn(name = "post_id")}
 //    )
-//    Set<Post> posts;
+    @Transient
+    Set<Post> posts;
 }

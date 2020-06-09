@@ -6,6 +6,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorListResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorResponse;
@@ -133,6 +134,7 @@ public class AuthService {
             ErrorMessage errorMessage = new ErrorMessage();
             errorMessage.setEmail(WRONG_CAPTCHA);
             return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
+
         }
 
         User user = new User();

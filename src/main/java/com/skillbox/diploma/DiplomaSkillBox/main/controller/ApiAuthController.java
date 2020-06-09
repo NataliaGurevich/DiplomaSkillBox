@@ -6,12 +6,12 @@ import com.skillbox.diploma.DiplomaSkillBox.main.mapper.UserMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.CaptchaCode;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.CaptchaRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
@@ -44,7 +44,10 @@ public class ApiAuthController {
     private CaptchaRepository captchaRepository;
 
     @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private PostRepository postRepository;
 
     @GetMapping("/check")
     public ResponseEntity getCheck(@CookieValue(value = "Token", defaultValue = "") String token) {
@@ -57,10 +60,11 @@ public class ApiAuthController {
 
         if (currentUser != null) {
             AuthResponseTrue authResponse = new AuthResponseTrue();
-            authResponse.setUser(UserMapper.converterToFullName(currentUser));
+            int count = postRepository.findNewPosts().orElse(0);
+            authResponse.setUser(UserMapper.converterToFullName(currentUser, currentUser.getIsModerator() ? count : 0));
             return new ResponseEntity(authResponse, OK);
         }
-        ErrorResponse error = new ErrorResponse();
+        ResultResponse error = new ResultResponse();
         error.setMessage("Current user was not found");
         return new ResponseEntity(error, OK);
     }
@@ -74,10 +78,11 @@ public class ApiAuthController {
         if (loggedUser != null) {
 
             AuthResponseTrue authResponse = new AuthResponseTrue();
-            authResponse.setUser(UserMapper.converterToFullName(loggedUser));
+            int count = postRepository.findNewPosts().orElse(0);
+            authResponse.setUser(UserMapper.converterToFullName(loggedUser, loggedUser.getIsModerator() ? count : 0));
             return new ResponseEntity(authResponse, OK);
         }
-        ErrorResponse error = new ErrorResponse();
+        ResultResponse error = new ResultResponse();
         error.setMessage("Invalid email or password");
         return new ResponseEntity(error, OK);
     }
