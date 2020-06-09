@@ -43,10 +43,10 @@ public class TagService {
             for (Tag tag : tags) {
                 List<Post> posts = tagToPostRepository.findPostsProTag(tag);
 
-                int countPostsProTags = posts == null ? 0 : (int)posts.stream()
+                int countPostsProTags = posts == null ? 0 : (int) posts.stream()
                         .filter(p -> p.getModerationStatus().equalsIgnoreCase("ACCEPTED")
                                 && p.getIsActive()).count();
-                double weight = (double)countPostsProTags / (double)countPosts;
+                double weight = (double) countPostsProTags / (double) countPosts;
 
                 log.info("TAG {}, TotalPosts {}, PostsProTag {}, weight {}", tag.getName(), countPosts, countPostsProTags, weight);
 

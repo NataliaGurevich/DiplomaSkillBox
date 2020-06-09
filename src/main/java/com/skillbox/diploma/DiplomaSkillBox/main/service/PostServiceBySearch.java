@@ -2,13 +2,10 @@ package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.mapper.PostMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.PostComment;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.Tag;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostCommentRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostVoteRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.TagToPostRepository;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.PostCommentsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -53,7 +49,7 @@ public class PostServiceBySearch {
 
     public PostsResponse getPostsBySearch(int offset, int limit, String querySearch) throws InterruptedException {
 
-        int currentPage = offset/limit;
+        int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
         List<PostResponse> posts = new ArrayList<>();
         Page<Post> postPage;

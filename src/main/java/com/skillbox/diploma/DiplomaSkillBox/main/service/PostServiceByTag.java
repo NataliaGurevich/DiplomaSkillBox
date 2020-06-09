@@ -6,8 +6,6 @@ import com.skillbox.diploma.DiplomaSkillBox.main.model.PostComment;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Tag;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostByTagResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.PostCommentsResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,7 @@ public class PostServiceByTag {
 
     public PostsResponse getSetPosts(int offset, int limit, String tagName) {
 
-        int currentPage = offset/limit;
+        int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
         List<PostByTagResponse> posts = new ArrayList<>();
         Page<Post> postPage;

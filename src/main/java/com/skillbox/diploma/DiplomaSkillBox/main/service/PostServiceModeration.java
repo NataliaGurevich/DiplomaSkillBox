@@ -2,7 +2,6 @@ package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.mapper.PostMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.PostComment;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostCommentRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
@@ -45,16 +44,15 @@ public class PostServiceModeration {
 
         postPage = postRepository.findPostForModeration(status, paging);
 
-        if(postPage == null || postPage.getSize() == 0) {
+        if (postPage == null || postPage.getSize() == 0) {
             return null;
         }
 
-        if(status.equalsIgnoreCase("ACCEPTED")){
+        if (status.equalsIgnoreCase("ACCEPTED")) {
             count = postPage.stream().filter(p -> (p.getModerator().getId().equals(currentUser.getId()))).count();
             postList = postPage.stream().filter(p ->
                     (p.getModerator().getId().equals(currentUser.getId()))).collect(Collectors.toList());
-        }
-        else {
+        } else {
             postList = postPage.stream().collect(Collectors.toList());
             count = postPage.getTotalElements();
         }
