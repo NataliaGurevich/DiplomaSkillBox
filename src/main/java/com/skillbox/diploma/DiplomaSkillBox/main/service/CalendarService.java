@@ -35,7 +35,7 @@ public class CalendarService {
             day = day.substring(0,10);
             String dayForQuery = day + "%";
 
-            Integer countPostsPerDay = postRepository.findCountPostsForCalendar(dayForQuery).get();
+            Integer countPostsPerDay = postRepository.findCountPostsForCalendar(Instant.now(), dayForQuery).get();
 
             log.info("POST PRO DAY {} - {}", day, countPostsPerDay);
 

@@ -50,8 +50,8 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
     Optional<List<Date>> findListDates(Instant instant);
 
     @Query(value = "SELECT COUNT(*) FROM posts " +
-            "WHERE is_active=true and moderation_status='ACCEPTED' and TEXT(time) like ?1", nativeQuery = true)
-    Optional<Integer> findCountPostsForCalendar(String day);
+            "WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1 and TEXT(time) like ?2", nativeQuery = true)
+    Optional<Integer> findCountPostsForCalendar(Instant instant, String day);
 
     @Query(value = "SELECT * FROM posts " +
             "WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1 and TEXT(time) like ?2", nativeQuery = true)
