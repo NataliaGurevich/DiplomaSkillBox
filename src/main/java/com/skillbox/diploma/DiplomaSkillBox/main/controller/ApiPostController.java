@@ -38,6 +38,9 @@ public class ApiPostController {
     @Autowired
     private PostServiceBySearch postServiceBySearch;
 
+    @Autowired
+    private PostServiceByDate postServiceByDate;
+
     @GetMapping("")
     public ResponseEntity getAllPost(@RequestParam(value = "offset", defaultValue = "0") int offset,
                                      @RequestParam(value = "limit", defaultValue = "10") int limit,
@@ -51,11 +54,7 @@ public class ApiPostController {
                                            @RequestParam(value = "limit", defaultValue = "10") int limit,
                                            @RequestParam(value = "date") String date) throws ParseException {
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        Date result = df.parse(date);
-        Instant instant = result.toInstant();
-
-        return new ResponseEntity(postServiceByMode.getAllPostByDate(offset, limit, instant), HttpStatus.OK);
+        return new ResponseEntity(postServiceByDate.getPostsByDate(offset, limit, date + "%"), HttpStatus.OK);
     }
 
     @GetMapping("{id}")

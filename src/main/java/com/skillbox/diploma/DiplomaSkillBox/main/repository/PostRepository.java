@@ -8,6 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,4 +44,16 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
 
     @Query(value = "SELECT COUNT(*) FROM posts WHERE is_active=true and moderation_status='NEW'", nativeQuery = true)
     Optional<Integer> findNewPosts();
+
+    @Query(value = "SELECT time FROM posts WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1"
+            , nativeQuery = true)
+    Optional<List<Date>> findListDates(Instant instant);
+
+    @Query(value = "SELECT COUNT(*) FROM posts " +
+            "WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1 and TEXT(time) like ?2", nativeQuery = true)
+    Optional<Integer> findCountPostsForCalendar(Instant instant, String day);
+
+    @Query(value = "SELECT * FROM posts " +
+            "WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1 and TEXT(time) like ?2", nativeQuery = true)
+    Page<Post> findPostsByDate(Instant instant, String day, Pageable paging);
 }
