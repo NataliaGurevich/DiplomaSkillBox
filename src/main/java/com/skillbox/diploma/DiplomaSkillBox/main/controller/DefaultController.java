@@ -5,12 +5,16 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.GlobalSettingsRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.GlobalSettingsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.CalendarService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.GlobalSettingsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Year;
+import java.util.Calendar;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -24,11 +28,17 @@ public class DefaultController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private CalendarService calendarService;
+
     private final InitializeResponse init;
 
     public DefaultController(InitializeResponse init) {
         this.init = init;
     }
+
+    private Calendar calendar = Calendar.getInstance();
+    private String currentYear = Integer.toString(calendar.get(Calendar.YEAR));
 
     @RequestMapping("/")
     public String index() {
@@ -67,5 +77,18 @@ public class DefaultController {
         }
 
         return new ResponseEntity(globalSettingsService.globalSettingsResponse(), OK);
+    }
+
+    @RequestMapping(value = "/api/calendar{year}", method = RequestMethod.GET)
+    public ResponseEntity calendar(@PathVariable String year){
+        try{
+            year = (year == null || Integer.parseInt(year) > Integer.parseInt(currentYear) || year.length() < 4) ?
+                    currentYear : year;
+        }
+        catch (NumberFormatException ex) {
+            year = currentYear;
+        }
+
+        return new ResponseEntity(calendarService.postsPerDate(year), OK);
     }
 }
