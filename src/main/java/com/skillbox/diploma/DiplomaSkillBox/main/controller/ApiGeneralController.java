@@ -5,6 +5,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.TagsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceModeration;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.StatisticsService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.TagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,16 @@ public class ApiGeneralController {
     private final TagService tagService;
     private final AuthService authService;
     private final PostServiceModeration postServiceModeration;
+    private final StatisticsService statisticsService;
 
     @Autowired
-    public ApiGeneralController(TagService tagService, AuthService authService, PostServiceModeration postServiceModeration) {
+    public ApiGeneralController(TagService tagService, AuthService authService,
+                                PostServiceModeration postServiceModeration,
+                                StatisticsService statisticsService) {
         this.tagService = tagService;
         this.authService = authService;
         this.postServiceModeration = postServiceModeration;
+        this.statisticsService = statisticsService;
     }
 
     @GetMapping("")
@@ -47,5 +52,22 @@ public class ApiGeneralController {
         } else {
             return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @GetMapping("/statistics/my")
+    public ResponseEntity statisticsMy(@CookieValue(value = "Token", defaultValue = "") String token) {
+        User currentUser = authService.getCurrentUser(token);
+        if (currentUser != null) {
+            log.info("STATISTIC MY {}", currentUser);
+            return new ResponseEntity(statisticsService.myStatistics(currentUser),
+                    HttpStatus.OK);
+        } else {
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/statistics/all")
+    public ResponseEntity statisticsAll() {
+        return new ResponseEntity(statisticsService.allStatistics(), HttpStatus.OK);
     }
 }

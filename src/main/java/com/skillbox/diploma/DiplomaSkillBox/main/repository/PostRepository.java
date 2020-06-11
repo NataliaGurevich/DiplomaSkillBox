@@ -75,4 +75,16 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
     @Query(value = "SELECT * FROM posts " +
             "WHERE user_id=?1 and is_active=true and moderation_status='ACCEPTED'", nativeQuery = true)
     Page<Post> findAllMyPostPublished(Long userId, Pageable paging);
+
+    @Query(value = "SELECT * FROM posts WHERE user_id=?1", nativeQuery = true)
+    Optional<List<Post>> findPostsByUser(Long userId);
+
+    @Query(value = "SELECT * FROM posts WHERE is_active=true and moderation_status='ACCEPTED'", nativeQuery = true)
+    Optional<List<Post>> findAllPosts();
+
+    @Query(value = "SELECT MIN(time) FROM posts WHERE user_id=?1", nativeQuery = true)
+    Optional<Date> findFirstPublicationByUser(Long userId);
+
+    @Query(value = "SELECT MIN(time) FROM posts WHERE is_active=true and moderation_status='ACCEPTED'", nativeQuery = true)
+    Optional<Date> findFirstPublication();
 }
