@@ -4,6 +4,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.mapper.PostMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.PostComment;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Tag;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostCommentRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostVoteRepository;
@@ -147,7 +148,7 @@ public class PostServiceByMode {
         return postsResponse;
     }
 
-    public PostCommentsResponse getPostById(Long id) {
+    public PostCommentsResponse getPostById(Long id, User currentUser) {
 
         Post post = postRepository.findById(id).orElse(null);
         PostCommentsResponse postCommentsResponse = null;
@@ -157,9 +158,11 @@ public class PostServiceByMode {
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
 
-            int viewCount = post.getViewCount() == null ? 1 : post.getViewCount() + 1;
-            post.setViewCount(viewCount);
-            postRepository.save(post);
+            if (!currentUser.getId().equals(post.getUser().getId())) {
+                int viewCount = post.getViewCount() == null ? 1 : post.getViewCount() + 1;
+                post.setViewCount(viewCount);
+                postRepository.save(post);
+            }
 
             List<PostComment> postComments = postCommentRepository.findAllByPost(post);
 

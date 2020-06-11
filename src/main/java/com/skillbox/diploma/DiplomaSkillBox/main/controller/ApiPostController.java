@@ -1,6 +1,7 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -9,11 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
 
 @Slf4j
 @RestController
@@ -41,6 +38,12 @@ public class ApiPostController {
     @Autowired
     private PostServiceByDate postServiceByDate;
 
+    @Autowired
+    private PostServiceMyPost postServiceMyPost;
+
+    @Autowired
+    private PostServiceById postServiceById;
+
     @GetMapping("")
     public ResponseEntity getAllPost(@RequestParam(value = "offset", defaultValue = "0") int offset,
                                      @RequestParam(value = "limit", defaultValue = "10") int limit,
@@ -58,9 +61,25 @@ public class ApiPostController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity getPostById(@PathVariable Long id) {
+    public ResponseEntity getPostById(@PathVariable Long id,
+                                      @CookieValue(value = "Token", defaultValue = "") String token) throws ParseException {
+        User currentUser = authService.getCurrentUser(token);
 
-        return new ResponseEntity(postServiceByMode.getPostById(id), HttpStatus.OK);
+        return new ResponseEntity(postServiceByMode.getPostById(id, currentUser), HttpStatus.OK);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity editPostById(@PathVariable Long id,
+                                       @RequestBody PostAddRequest postAddRequest,
+                                       @CookieValue(value = "Token", defaultValue = "") String token) throws ParseException {
+        User currentUser = authService.getCurrentUser(token);
+
+        if (currentUser != null) {
+            log.info("IN EDIT POST currentUser {}", postAddRequest, currentUser.getName());
+            return new ResponseEntity(postServiceById.editPostById(id, postAddRequest), HttpStatus.OK);
+        } else {
+            return new ResponseEntity(null, HttpStatus.OK);
+        }
     }
 
     @PostMapping("")
@@ -99,6 +118,21 @@ public class ApiPostController {
                                           @RequestParam(value = "query", defaultValue = "", required = false) String querySearch) throws InterruptedException {
 
         return new ResponseEntity(postServiceBySearch.getPostsBySearch(offset, limit, querySearch.trim()), HttpStatus.OK);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity getMyPost(@RequestParam(value = "offset", defaultValue = "0") int offset,
+                                    @RequestParam(value = "limit", defaultValue = "10") int limit,
+                                    @RequestParam(value = "status", defaultValue = "inactive") String status,
+                                    @CookieValue(value = "Token", defaultValue = "") String token) {
+        User currentUser = authService.getCurrentUser(token);
+
+        if (currentUser != null) {
+            log.info("IN MY currentUser {}", currentUser.getName());
+            return new ResponseEntity(postServiceMyPost.getMyPosts(offset, limit, status, currentUser), HttpStatus.OK);
+        } else {
+            return new ResponseEntity(null, HttpStatus.OK);
+        }
     }
 }
 

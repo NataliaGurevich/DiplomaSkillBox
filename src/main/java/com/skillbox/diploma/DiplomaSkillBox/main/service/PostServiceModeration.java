@@ -6,8 +6,10 @@ import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostCommentRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostVoteRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,17 +44,22 @@ public class PostServiceModeration {
         List<Post> postList;
         long count;
 
-        postPage = postRepository.findPostForModeration(status, paging);
-
-        if (postPage == null || postPage.getSize() == 0) {
-            return null;
+        if(status.equalsIgnoreCase("accepted")){
+            status = "ACCEPTED";
+        }
+        else if (status.equalsIgnoreCase("declined")){
+            status = "DECLINED";
+        }
+        else {
+            status = "NEW";
         }
 
         if (status.equalsIgnoreCase("ACCEPTED")) {
-            count = postPage.stream().filter(p -> (p.getModerator().getId().equals(currentUser.getId()))).count();
-            postList = postPage.stream().filter(p ->
-                    (p.getModerator().getId().equals(currentUser.getId()))).collect(Collectors.toList());
+            postPage = postRepository.findPostForModerationAccepted(currentUser.getId(), paging);
+            postList = postPage.stream().collect(Collectors.toList());
+            count = postPage.getTotalElements();
         } else {
+            postPage = postRepository.findPostForModeration(status, paging);
             postList = postPage.stream().collect(Collectors.toList());
             count = postPage.getTotalElements();
         }
@@ -85,5 +92,26 @@ public class PostServiceModeration {
         log.info("POSTS {}", postsResponse);
 
         return postsResponse;
+    }
+
+    public ResultResponse setModeration(ModerationRequest moderationRequest, User moderator) {
+
+        Long postId = moderationRequest.getPostId();
+        String moderationStatus = moderationRequest.getDecision().equalsIgnoreCase("accept") ?
+                "ACCEPTED" : "DECLINED";
+
+        log.info("MODERATION postId {}, status{}", postId, moderationStatus);
+
+        Post post = postRepository.findById(postId).get();
+        post.setModerator(moderator);
+        post.setModerationStatus(moderationStatus);
+        Post postEdit = postRepository.save(post);
+
+        if (postEdit != null){
+            return new ResultResponse(true);
+        }
+        else {
+            return new ResultResponse(false, "Moderation status don't edit");
+        }
     }
 }

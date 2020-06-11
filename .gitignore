@@ -34,4 +34,5 @@ build/
 ### VS Code ###
 .vscode/
 
-data/*
+### Search ###
+com.skillbox.diploma.DiplomaSkillBox.main.model.Post/*

@@ -94,7 +94,7 @@ public class PostAddService {
                 TagToPost tagToPost = new TagToPost();
                 tagToPost.setPost(postCreated);
                 tagToPost.setTag(tag);
-                getTagToPostRepository().save(tagToPost);
+                tagToPostRepository.save(tagToPost);
             }
         }
 
