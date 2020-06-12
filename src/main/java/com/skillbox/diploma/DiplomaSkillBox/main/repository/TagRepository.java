@@ -14,6 +14,9 @@ import java.util.Optional;
 public interface TagRepository extends JpaRepository<Tag, Long> {
     List<Tag> findAll();
 
+    @Query(value = "SELECT * FROM tags WHERE name like ?1", nativeQuery = true)
+    List<Tag> findTagByQuery(String query);
+
     @Query(value = "SELECT * FROM tags WHERE name=?1", nativeQuery = true)
     Tag findIdByName(String name);
 

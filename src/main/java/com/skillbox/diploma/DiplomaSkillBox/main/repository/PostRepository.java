@@ -16,6 +16,11 @@ import java.util.Optional;
 public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
     Page<Post> findAll(Pageable paging);
 
+    @Query(value = "SELECT * FROM posts " +
+            "WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1 " +
+            "ORDER BY time DESC", nativeQuery = true)
+    List<Post> findAllActualPost(Instant instant);
+
     Optional<Post> findById(Long id);
 
     @Query(value = "SELECT * FROM posts " +
@@ -39,6 +44,9 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
     @Query(value = "SELECT * FROM posts WHERE is_active=true and moderation_status=?1", nativeQuery = true)
     Page<Post> findPostForModeration(String status, Pageable paging);
 
+    @Query(value = "SELECT * FROM posts WHERE is_active=true and moderation_status='ACCEPTED' and moderator_id=?1", nativeQuery = true)
+    Page<Post> findPostForModerationAccepted(Long idModerator, Pageable paging);
+
     @Query(value = "SELECT * FROM posts WHERE is_active=true", nativeQuery = true)
     List<Post> findPostForModerationList();
 
@@ -56,4 +64,32 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
     @Query(value = "SELECT * FROM posts " +
             "WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1 and TEXT(time) like ?2", nativeQuery = true)
     Page<Post> findPostsByDate(Instant instant, String day, Pageable paging);
+
+    @Query(value = "SELECT * FROM posts " +
+            "WHERE user_id=?1 and is_active=false", nativeQuery = true)
+    Page<Post> findAllMyPostInactive(Long userId, Pageable paging);
+
+    @Query(value = "SELECT * FROM posts " +
+            "WHERE user_id=?1 and is_active=true and moderation_status='NEW'", nativeQuery = true)
+    Page<Post> findAllMyPostPending(Long userId, Pageable paging);
+
+    @Query(value = "SELECT * FROM posts " +
+            "WHERE user_id=?1 and is_active=true and moderation_status='DECLINED'", nativeQuery = true)
+    Page<Post> findAllMyPostDeclined(Long userId, Pageable paging);
+
+    @Query(value = "SELECT * FROM posts " +
+            "WHERE user_id=?1 and is_active=true and moderation_status='ACCEPTED'", nativeQuery = true)
+    Page<Post> findAllMyPostPublished(Long userId, Pageable paging);
+
+    @Query(value = "SELECT * FROM posts WHERE user_id=?1", nativeQuery = true)
+    Optional<List<Post>> findPostsByUser(Long userId);
+
+    @Query(value = "SELECT * FROM posts WHERE is_active=true and moderation_status='ACCEPTED'", nativeQuery = true)
+    Optional<List<Post>> findAllPosts();
+
+    @Query(value = "SELECT MIN(time) FROM posts WHERE user_id=?1", nativeQuery = true)
+    Optional<Date> findFirstPublicationByUser(Long userId);
+
+    @Query(value = "SELECT MIN(time) FROM posts WHERE is_active=true and moderation_status='ACCEPTED'", nativeQuery = true)
+    Optional<Date> findFirstPublication();
 }

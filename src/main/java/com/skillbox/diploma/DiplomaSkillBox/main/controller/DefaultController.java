@@ -7,8 +7,10 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.CalendarService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.GlobalSettingsService;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceByMode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,23 +24,23 @@ import static org.springframework.http.HttpStatus.OK;
 @Controller
 public class DefaultController {
 
-    @Autowired
-    private GlobalSettingsService globalSettingsService;
-
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private CalendarService calendarService;
-
+    private final GlobalSettingsService globalSettingsService;
+    private final AuthService authService;
+    private final CalendarService calendarService;
+    private final PostServiceByMode postServiceByMode;
     private final InitializeResponse init;
-
-    public DefaultController(InitializeResponse init) {
-        this.init = init;
-    }
 
     private Calendar calendar = Calendar.getInstance();
     private String currentYear = Integer.toString(calendar.get(Calendar.YEAR));
+
+    @Autowired
+    public DefaultController(GlobalSettingsService globalSettingsService, AuthService authService, CalendarService calendarService, PostServiceByMode postServiceByMode, InitializeResponse init) {
+        this.globalSettingsService = globalSettingsService;
+        this.authService = authService;
+        this.calendarService = calendarService;
+        this.postServiceByMode = postServiceByMode;
+        this.init = init;
+    }
 
     @RequestMapping("/")
     public String index() {
@@ -90,5 +92,13 @@ public class DefaultController {
         }
 
         return new ResponseEntity(calendarService.postsPerDate(year), OK);
+    }
+
+    @RequestMapping(value = "/posts/recent", method = RequestMethod.GET)
+    public ResponseEntity defaultPage(@RequestParam(value = "offset", defaultValue = "0") int offset,
+                                      @RequestParam(value = "limit", defaultValue = "10") int limit,
+                                      @RequestParam(value = "mode", defaultValue = "recent") String mode) {
+
+        return new ResponseEntity(postServiceByMode.getSetPosts(offset, limit, mode), HttpStatus.OK);
     }
 }

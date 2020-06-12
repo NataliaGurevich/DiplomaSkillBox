@@ -4,6 +4,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.mapper.PostMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.PostComment;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Tag;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostCommentRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostVoteRepository;
@@ -12,14 +13,17 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.PostCommentsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,18 +31,18 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceByMode {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostVoteRepository postVoteRepository;
+    private final TagToPostRepository tagToPostRepository;
 
     @Autowired
-    private PostCommentRepository postCommentRepository;
-
-    @Autowired
-    private PostVoteRepository postVoteRepository;
-
-    @Autowired
-    private TagToPostRepository tagToPostRepository;
-
+    public PostServiceByMode(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository) {
+        this.postRepository = postRepository;
+        this.postCommentRepository = postCommentRepository;
+        this.postVoteRepository = postVoteRepository;
+        this.tagToPostRepository = tagToPostRepository;
+    }
 
     public PostsResponse getSetPosts(int offset, int limit, String mode) {
 
@@ -72,47 +76,38 @@ public class PostServiceByMode {
                 posts = cretePostList(postList);
             }
         } else if (mode.equalsIgnoreCase("popular")) {
-            postPage = postRepository.findAllPostEarly(Instant.now(), paging);
 
-            postList = postPage.stream().collect(Collectors.toList());
+            postList = postRepository.findAllActualPost(Instant.now());
 
             if (postList != null) {
-
-                count = postList.stream().peek(p -> {
-                    Integer countComment = postCommentRepository.findCountComments(p.getId()).orElse(0);
-                    p.setCommentCount(countComment);
-                }).count();
+                count = postList.size();
 
                 postList = postList.stream().peek(p -> {
                             Integer countComment = postCommentRepository.findCountComments(p.getId()).orElse(0);
                             p.setCommentCount(countComment);
                         }
-                ).collect(Collectors.toList());
-
-                postList = postList.stream().sorted((p1, p2) -> p2.getCommentCount()
+                ).sorted((p1, p2) -> p2.getCommentCount()
                         .compareTo(p1.getCommentCount())).collect(Collectors.toList());
 
+                int endList = Math.min((offset + limit), (int) count);
+                postList = postList.subList(offset, endList);
                 posts = cretePostList(postList);
             }
         } else if (mode.equalsIgnoreCase("best")) {
-            postPage = postRepository.findAllPostEarly(Instant.now(), paging);
 
-            postList = postPage.stream().collect(Collectors.toList());
+            postList = postRepository.findAllActualPost(Instant.now());
 
             if (postList != null) {
-
-                count = postList.stream().peek(p -> {
-                    Integer countLike = postVoteRepository.findCountLikes(p.getId()).orElse(0);
-                    p.setLikeCount(countLike);
-                }).count();
+                count = postList.size();
 
                 postList = postList.stream().peek(p -> {
                             Integer countLike = postVoteRepository.findCountLikes(p.getId()).orElse(0);
                             p.setLikeCount(countLike);
-                        }
-                ).collect(Collectors.toList());
+                    log.info("BEST COUNT LIKES postId {} - countLikes {}", p.getId(), p.getLikeCount());
+                        }).sorted((p1, p2) -> p2.getLikeCount().compareTo(p1.getLikeCount())).collect(Collectors.toList());
 
-                postList = postList.stream().sorted((p1, p2) -> p2.getLikeCount().compareTo(p1.getLikeCount())).collect(Collectors.toList());
+                int endList = Math.min((offset + limit), (int) count);
+                postList = postList.subList(offset, endList);
                 posts = cretePostList(postList);
             }
         } else {
@@ -147,7 +142,7 @@ public class PostServiceByMode {
         return postsResponse;
     }
 
-    public PostCommentsResponse getPostById(Long id) {
+    public PostCommentsResponse getPostById(Long id, User currentUser) {
 
         Post post = postRepository.findById(id).orElse(null);
         PostCommentsResponse postCommentsResponse = null;
@@ -157,9 +152,11 @@ public class PostServiceByMode {
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
 
-            int viewCount = post.getViewCount() == null ? 1 : post.getViewCount() + 1;
-            post.setViewCount(viewCount);
-            postRepository.save(post);
+            if (currentUser == null || (!post.getUser().equals(currentUser) && !currentUser.getIsModerator())) {
+                int viewCount = post.getViewCount() == null ? 1 : post.getViewCount() + 1;
+                post.setViewCount(viewCount);
+                postRepository.save(post);
+            }
 
             List<PostComment> postComments = postCommentRepository.findAllByPost(post);
 
