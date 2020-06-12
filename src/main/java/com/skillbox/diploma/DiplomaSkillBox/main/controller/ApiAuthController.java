@@ -37,17 +37,18 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/api/auth")
 public class ApiAuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+    private final CaptchaRepository captchaRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PostRepository postRepository;
 
     @Autowired
-    private CaptchaRepository captchaRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
-    private PostRepository postRepository;
+    public ApiAuthController(AuthService authService, CaptchaRepository captchaRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PostRepository postRepository) {
+        this.authService = authService;
+        this.captchaRepository = captchaRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.postRepository = postRepository;
+    }
 
     @GetMapping("/check")
     public ResponseEntity getCheck(@CookieValue(value = "Token", defaultValue = "") String token) {

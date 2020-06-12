@@ -1,10 +1,7 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.mapper.PostMapper;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.PostComment;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.Tag;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.TagToPost;
+import com.skillbox.diploma.DiplomaSkillBox.main.model.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostCommentsResponse;
@@ -67,7 +64,7 @@ public class PostServiceById {
         return postCommentsResponse;
     }
 
-    public ResultResponse editPostById(Long id, PostAddRequest postAddRequest) throws ParseException {
+    public ResultResponse editPostById(Long id, PostAddRequest postAddRequest, User currentUser) throws ParseException {
 
         Post post = postRepository.findById(id).orElse(null);
 
@@ -106,14 +103,15 @@ public class PostServiceById {
                 post.setIsActive(isActive);
                 post.setTitle(title);
                 post.setText(text);
-                post.setModerationStatus("NEW");
+                if(post.getUser().equals(currentUser)) {
+                    post.setModerationStatus("NEW");
+                    post.setModerator(null);
+                }
                 post.setTime(instant.isBefore(Instant.now()) ? Instant.now() : instant);
-                post.setModerator(null);
-                post.setViewCount(0);
+//                post.setViewCount(0);
                 postCreated = postRepository.save(post);
 
                 log.info("NEW POST {}", postCreated);
-
 
                 Set<Tag> tags = addTag(tagsName);
                 if (tags != null && tags.size() > 0) {

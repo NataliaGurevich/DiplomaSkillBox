@@ -1,7 +1,8 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
+import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
-import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,32 +18,30 @@ import java.text.ParseException;
 @RequestMapping("/api/post")
 public class ApiPostController {
 
-    @Autowired
-    private PostAddService postService;
+    private final PostAddService postService;
+    private final PostServiceByMode postServiceByMode;
+    private final PostServiceByTag postServiceByTag;
+    private final PostServiceModeration postServiceModeration;
+    private final AuthService authService;
+    private final PostServiceBySearch postServiceBySearch;
+    private final PostServiceByDate postServiceByDate;
+    private final PostServiceMyPost postServiceMyPost;
+    private final PostServiceById postServiceById;
+    private final PostRepository postRepository;
 
     @Autowired
-    private PostServiceByMode postServiceByMode;
-
-    @Autowired
-    private PostServiceByTag postServiceByTag;
-
-    @Autowired
-    private PostServiceModeration postServiceModeration;
-
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private PostServiceBySearch postServiceBySearch;
-
-    @Autowired
-    private PostServiceByDate postServiceByDate;
-
-    @Autowired
-    private PostServiceMyPost postServiceMyPost;
-
-    @Autowired
-    private PostServiceById postServiceById;
+    public ApiPostController(PostAddService postService, PostServiceByMode postServiceByMode, PostServiceByTag postServiceByTag, PostServiceModeration postServiceModeration, AuthService authService, PostServiceBySearch postServiceBySearch, PostServiceByDate postServiceByDate, PostServiceMyPost postServiceMyPost, PostServiceById postServiceById, PostRepository postRepository) {
+        this.postService = postService;
+        this.postServiceByMode = postServiceByMode;
+        this.postServiceByTag = postServiceByTag;
+        this.postServiceModeration = postServiceModeration;
+        this.authService = authService;
+        this.postServiceBySearch = postServiceBySearch;
+        this.postServiceByDate = postServiceByDate;
+        this.postServiceMyPost = postServiceMyPost;
+        this.postServiceById = postServiceById;
+        this.postRepository = postRepository;
+    }
 
     @GetMapping("")
     public ResponseEntity getAllPost(@RequestParam(value = "offset", defaultValue = "0") int offset,
@@ -64,7 +63,6 @@ public class ApiPostController {
     public ResponseEntity getPostById(@PathVariable Long id,
                                       @CookieValue(value = "Token", defaultValue = "") String token) throws ParseException {
         User currentUser = authService.getCurrentUser(token);
-
         return new ResponseEntity(postServiceByMode.getPostById(id, currentUser), HttpStatus.OK);
     }
 
@@ -73,12 +71,13 @@ public class ApiPostController {
                                        @RequestBody PostAddRequest postAddRequest,
                                        @CookieValue(value = "Token", defaultValue = "") String token) throws ParseException {
         User currentUser = authService.getCurrentUser(token);
+        Post post = postRepository.findById(id).orElse(null);
 
-        if (currentUser != null) {
+        if (currentUser != null && post != null && (post.getUser().equals(currentUser) || currentUser.getIsModerator())) {
             log.info("IN EDIT POST currentUser {}", postAddRequest, currentUser.getName());
-            return new ResponseEntity(postServiceById.editPostById(id, postAddRequest), HttpStatus.OK);
+            return new ResponseEntity(postServiceById.editPostById(id, postAddRequest, currentUser), HttpStatus.OK);
         } else {
-            return new ResponseEntity(null, HttpStatus.OK);
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -108,7 +107,7 @@ public class ApiPostController {
             return new ResponseEntity(postServiceModeration.getSetPosts(offset, limit, status.toUpperCase(), currentUser),
                     HttpStatus.OK);
         } else {
-            return new ResponseEntity(null, HttpStatus.OK);
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -131,7 +130,7 @@ public class ApiPostController {
             log.info("IN MY currentUser {}", currentUser.getName());
             return new ResponseEntity(postServiceMyPost.getMyPosts(offset, limit, status, currentUser), HttpStatus.OK);
         } else {
-            return new ResponseEntity(null, HttpStatus.OK);
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
         }
     }
 }

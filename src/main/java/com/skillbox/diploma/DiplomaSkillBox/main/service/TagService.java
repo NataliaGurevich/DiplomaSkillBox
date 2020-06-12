@@ -33,11 +33,18 @@ public class TagService {
     @Autowired
     private TagToPostRepository tagToPostRepository;
 
-    private List<TagResponse> getListTags() {
+    private List<TagResponse> getListTags(String query) {
         List<TagResponse> tagsWeights = new ArrayList<>();
 
         int countPosts = postRepository.findCountPosts(Instant.now()).orElse(1);
-        List<Tag> tags = tagRepository.findAll();
+
+        List<Tag> tags = null;
+        if (query.equals("")) {
+            tags = tagRepository.findAll();
+        }
+        else{
+            tags = tagRepository.findTagByQuery(query.toUpperCase() + "%");
+        }
 
         if (tags != null) {
             for (Tag tag : tags) {
@@ -57,9 +64,9 @@ public class TagService {
     }
 
 
-    public TagsResponse getAllTags() {
+    public TagsResponse getAllTags(String query) {
         TagsResponse tagsResponse = new TagsResponse();
-        List<TagResponse> tagsWeights = getListTags();
+        List<TagResponse> tagsWeights = getListTags(query);
 
         tagsResponse.setCount(tagsWeights.size());
         tagsResponse.setTags(tagsWeights);

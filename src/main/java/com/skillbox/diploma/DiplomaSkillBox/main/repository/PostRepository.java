@@ -16,6 +16,11 @@ import java.util.Optional;
 public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
     Page<Post> findAll(Pageable paging);
 
+    @Query(value = "SELECT * FROM posts " +
+            "WHERE is_active=true and moderation_status='ACCEPTED' and time<=?1 " +
+            "ORDER BY time DESC", nativeQuery = true)
+    List<Post> findAllActualPost(Instant instant);
+
     Optional<Post> findById(Long id);
 
     @Query(value = "SELECT * FROM posts " +

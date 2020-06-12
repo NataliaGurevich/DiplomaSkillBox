@@ -2,14 +2,12 @@ package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.TagsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceModeration;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.StatisticsService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.TagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +34,12 @@ public class ApiGeneralController {
 
     @GetMapping("")
     @RequestMapping("/tag")
-    public ResponseEntity getAllTag() {
-        return new ResponseEntity(tagService.getAllTags(), HttpStatus.OK);
+    public ResponseEntity getAllTag(@RequestParam(name = "query", required = false) String query) {
+
+        query = (query == null || query.trim().length() == 0) ? "" : query.trim();
+
+        return new ResponseEntity(tagService.getAllTags(query), HttpStatus.OK);
+
     }
 
 
