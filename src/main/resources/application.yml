@@ -21,3 +21,6 @@ jwt.token.expired: 54000000
 captcha.token.live: 3600000
 
 cron.expression.captcha.del: "0 */10 * * * *"
+
+hibernate.search.default.directory_provider: filesystem
+hibernate.search.default.indexBase: /data/index/default

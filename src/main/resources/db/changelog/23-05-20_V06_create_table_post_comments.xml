@@ -10,7 +10,9 @@
             <column name="id" type="bigserial">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="parent_id" type="bigint"/>
+            <column name="parent_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
             <column name="post_id" type="bigint">
                 <constraints nullable="false"/>
             </column>

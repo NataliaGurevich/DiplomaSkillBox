@@ -8,6 +8,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorListResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.TrueFalseResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtTokenProvider;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUserFactory;
 import lombok.Data;
@@ -145,7 +146,7 @@ public class AuthService {
 
         log.info("IN REGISTRATION user {} is registered", user);
 
-        return new ResponseEntity(true, HttpStatus.OK);
+        return new ResponseEntity(new TrueFalseResponse(true), HttpStatus.OK);
     }
 
     public CaptchaResponse getCaptchaResponse(String secret, String captcha) {

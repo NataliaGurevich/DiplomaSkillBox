@@ -1,16 +1,18 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.CommentRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceModeration;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.StatisticsService;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.TagService;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorText;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorTextResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.xml.transform.OutputKeys;
 
 @Slf4j
 @RestController
@@ -21,15 +23,17 @@ public class ApiGeneralController {
     private final AuthService authService;
     private final PostServiceModeration postServiceModeration;
     private final StatisticsService statisticsService;
+    private final CommentService commentService;
 
     @Autowired
     public ApiGeneralController(TagService tagService, AuthService authService,
                                 PostServiceModeration postServiceModeration,
-                                StatisticsService statisticsService) {
+                                StatisticsService statisticsService, CommentService commentService) {
         this.tagService = tagService;
         this.authService = authService;
         this.postServiceModeration = postServiceModeration;
         this.statisticsService = statisticsService;
+        this.commentService = commentService;
     }
 
     @GetMapping("")
@@ -71,5 +75,22 @@ public class ApiGeneralController {
     @GetMapping("/statistics/all")
     public ResponseEntity statisticsAll() {
         return new ResponseEntity(statisticsService.allStatistics(), HttpStatus.OK);
+    }
+
+    @PostMapping("/comment")
+    public ResponseEntity commentToPost(@RequestBody CommentRequest commentRequest,
+                                        @CookieValue(value = "Token", defaultValue = "") String token) {
+        User currentUser = authService.getCurrentUser(token);
+        if (currentUser != null) {
+            if (commentRequest.getText() == null || commentRequest.getText().length() < 3) {
+             return new ResponseEntity(new ErrorTextResponse(
+                     new ErrorText("Текст комментария не задан или слишком короткий")), HttpStatus.OK);
+            }
+            else {
+                return new ResponseEntity(commentService.addComment(commentRequest, currentUser), HttpStatus.OK);
+            }
+        } else {
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
     }
 }

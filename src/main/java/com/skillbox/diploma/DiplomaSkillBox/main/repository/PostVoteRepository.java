@@ -23,4 +23,7 @@ public interface PostVoteRepository extends JpaRepository<PostVote, Long> {
     @Query(value = "SELECT COUNT(*) FROM post_votes " +
             "WHERE post_id=?1 and value=false", nativeQuery = true)
     Optional<Integer> findCountDislikes(Long id);
+
+    @Query(value = "SELECT * FROM post_votes WHERE post_id=?1 and user_id=?2", nativeQuery = true)
+    Optional<PostVote> findByPostAndUser(Long postId, Long userId);
 }
