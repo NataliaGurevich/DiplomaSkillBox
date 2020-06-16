@@ -10,11 +10,17 @@ import com.skillbox.diploma.DiplomaSkillBox.main.service.GlobalSettingsService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceByMode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Year;
 import java.util.Calendar;
 
@@ -100,5 +106,11 @@ public class DefaultController {
                                       @RequestParam(value = "mode", defaultValue = "recent") String mode) {
 
         return new ResponseEntity(postServiceByMode.getSetPosts(offset, limit, mode), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/login/change-password/{code}", method = RequestMethod.GET)
+    public String restorePassword(@PathVariable String code) {
+
+        return "forward:/";
     }
 }

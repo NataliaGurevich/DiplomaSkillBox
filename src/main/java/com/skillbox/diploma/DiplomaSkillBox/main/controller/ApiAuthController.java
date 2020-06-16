@@ -8,10 +8,13 @@ import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.CaptchaRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRequest;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRestoreRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.TrueFalseResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
@@ -19,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -95,9 +97,9 @@ public class ApiAuthController {
     }
 
     @GetMapping("/logout")
-    public RedirectView logout() {
+    public ResponseEntity logout() {
         authService.logout();
-        return new RedirectView("/posts/recent");
+        return new ResponseEntity(new TrueFalseResponse(true), OK);
     }
 
     @GetMapping("/captcha")
@@ -124,5 +126,16 @@ public class ApiAuthController {
         captchaRepository.save(captchaCode);
 
         return new ResponseEntity(authService.getCaptchaResponse(secret, imageString), OK);
+    }
+
+    @PostMapping("/restore")
+    public ResponseEntity restorePassword(@RequestBody PasswordRestoreRequest passwordRequest){
+        return new ResponseEntity(authService.sendMailToRestorePassword(passwordRequest), OK);
+    }
+
+    @PostMapping("/password")
+    public ResponseEntity checkPasswordForRestore(@RequestBody PasswordRequest passwordRequest) {
+
+        return new ResponseEntity(authService.restorePassword(passwordRequest), OK);
     }
 }

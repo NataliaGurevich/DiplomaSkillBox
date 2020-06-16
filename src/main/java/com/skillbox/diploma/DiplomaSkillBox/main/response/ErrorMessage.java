@@ -9,4 +9,5 @@ public class ErrorMessage {
     private String name;
     private String password;
     private String captcha;
+    private String code;
 }

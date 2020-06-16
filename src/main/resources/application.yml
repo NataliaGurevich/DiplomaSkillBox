@@ -21,6 +21,18 @@ jwt.token.expired: 54000000
 captcha.token.live: 3600000
 
 cron.expression.captcha.del: "0 */10 * * * *"
+cron.expression.code.del: "0 0 */1 * * *"
 
 hibernate.search.default.directory_provider: filesystem
 hibernate.search.default.indexBase: /data/index/default
+
+spring.email.host: smtp.yandex.ua
+spring.email.username: devpub@sendel.ru
+spring.email.password: s&vnEN}>8rUz\9yM
+spring.email.port: 465
+spring.email.protocol: smtps
+mail.debug: true
+spring.mail.properties.mail.smtp.auth: true
+spring.mail.properties.mail.smtps.starttls.enable: true
+
+host: http://localhost:8080
