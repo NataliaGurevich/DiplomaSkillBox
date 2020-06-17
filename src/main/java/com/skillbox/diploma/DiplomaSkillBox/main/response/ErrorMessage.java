@@ -10,4 +10,5 @@ public class ErrorMessage {
     private String password;
     private String captcha;
     private String code;
+    private String photo;
 }

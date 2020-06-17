@@ -31,7 +31,7 @@ public class ScheduledTasks {
     }
 
     @Scheduled(cron = "${cron.expression.captcha.del}")
-    public void deletingCaptcha(){
+    public void deletingCaptcha() {
 
         List<CaptchaCode> captchaCodes = captchaRepository.getCaptchaCodeLastHour(Instant.now().minusSeconds(60 * 60));
 
@@ -42,20 +42,18 @@ public class ScheduledTasks {
                 log.info("IN SCHEDULE captcha {} is deleted", captcha);
             }
             captchaCodes.clear();
-        }
-        else {
+        } else {
             log.info("IN SCHEDULE there is no captcha for deleting");
         }
     }
 
     @Scheduled(cron = "${cron.expression.code.del}")
-    public void deletingCode(){
-
-       Map<String, Instant> codes = authService.getCodes();
+    public void deletingCode() {
+        Map<String, Instant> codes = authService.getCodes();
 
         if (codes != null && codes.size() > 0) {
-            for (String code : codes.keySet()){
-                if (codes.get(code).plus(3, ChronoUnit.HOURS).isBefore(Instant.now())){
+            for (String code : codes.keySet()) {
+                if (codes.get(code).plus(3, ChronoUnit.HOURS).isBefore(Instant.now())) {
                     User user = userRepository.findByCode(code);
                     if (user != null) {
                         user.setCode(null);

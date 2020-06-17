@@ -107,7 +107,7 @@ public class ApiAuthController {
         final int CAPTCHA_WIDTH = 100;
         final int CAPTCHA_HEIGHT = 35;
 
-        String token = Integer.toString((int) (Math.random() * 100_000));
+        String token = Integer.toString((int) (Math.random() * 100_000) + (int) Math.random() * 100_000);
         String secret = bCryptPasswordEncoder.encode(token);
 
         Cage cage = new GCage();

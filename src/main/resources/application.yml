@@ -36,3 +36,11 @@ spring.mail.properties.mail.smtp.auth: true
 spring.mail.properties.mail.smtps.starttls.enable: true
 
 host: http://localhost:8080
+
+#Cloudinary
+#username=DevPub
+#password=#5P!EtPdZ4Pz2nR
+com.cloudinary.cloud_name: dxywt3ld7
+com.cloudinary.api_key: 372888264999633
+com.cloudinary.api_secret: ZJfDjL0K6wxdvtZr-cz0ua0-VSY
+com.cloudinari.url: http://res.cloudinary.com/
