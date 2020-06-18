@@ -12,6 +12,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByName(String name);
     User findByEmail(String email);
+    User findByCode(String code);
     List<User> findAll();
 
     @Query(value = "SELECT * FROM users WHERE is_moderator=true", nativeQuery = true)

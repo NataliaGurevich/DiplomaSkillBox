@@ -6,20 +6,24 @@ import com.skillbox.diploma.DiplomaSkillBox.main.mapper.UserMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.CaptchaCode;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.CaptchaRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRequest;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRestoreRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.TrueFalseResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -41,13 +45,15 @@ public class ApiAuthController {
     private final CaptchaRepository captchaRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final PostRepository postRepository;
+    private final GlobalSettingsRepository globalSettingsRepository;
 
     @Autowired
-    public ApiAuthController(AuthService authService, CaptchaRepository captchaRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PostRepository postRepository) {
+    public ApiAuthController(AuthService authService, CaptchaRepository captchaRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PostRepository postRepository, GlobalSettingsRepository globalSettingsRepository) {
         this.authService = authService;
         this.captchaRepository = captchaRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.postRepository = postRepository;
+        this.globalSettingsRepository = globalSettingsRepository;
     }
 
     @GetMapping("/check")
@@ -76,28 +82,39 @@ public class ApiAuthController {
 
         User loggedUser = authService.login(loginRequest, request, response);
 
-        if (loggedUser != null) {
+        if (globalSettingsRepository.findSettingsValueByCode("MULTIUSER_MODE") || loggedUser.getIsModerator()) {
 
-            AuthResponseTrue authResponse = new AuthResponseTrue();
-            int count = postRepository.findNewPosts().orElse(0);
-            authResponse.setUser(UserMapper.converterToFullName(loggedUser, loggedUser.getIsModerator() ? count : 0));
-            return new ResponseEntity(authResponse, OK);
+            if (loggedUser != null) {
+
+                AuthResponseTrue authResponse = new AuthResponseTrue();
+                int count = postRepository.findNewPosts().orElse(0);
+                authResponse.setUser(UserMapper.converterToFullName(loggedUser, loggedUser.getIsModerator() ? count : 0));
+                return new ResponseEntity(authResponse, OK);
+            }
+            ResultResponse error = new ResultResponse();
+            error.setMessage("Invalid email or password");
+            return new ResponseEntity(error, OK);
         }
-        ResultResponse error = new ResultResponse();
-        error.setMessage("Invalid email or password");
-        return new ResponseEntity(error, OK);
+        else {
+            return new ResponseEntity(null, HttpStatus.OK);
+        }
     }
 
     @PostMapping("/register")
     public ResponseEntity registration(@RequestBody Registration registrationRequest) {
 
-        return authService.registration(registrationRequest);
+        if (globalSettingsRepository.findSettingsValueByCode("MULTIUSER_MODE")) {
+            return authService.registration(registrationRequest);
+        }
+        else {
+            return new ResponseEntity(null, HttpStatus.OK);
+        }
     }
 
     @GetMapping("/logout")
-    public RedirectView logout() {
+    public ResponseEntity logout() {
         authService.logout();
-        return new RedirectView("/posts/recent");
+        return new ResponseEntity(new TrueFalseResponse(true), OK);
     }
 
     @GetMapping("/captcha")
@@ -105,7 +122,7 @@ public class ApiAuthController {
         final int CAPTCHA_WIDTH = 100;
         final int CAPTCHA_HEIGHT = 35;
 
-        String token = Integer.toString((int) (Math.random() * 100_000));
+        String token = Integer.toString((int) (Math.random() * 100_000) + (int) Math.random() * 100_000);
         String secret = bCryptPasswordEncoder.encode(token);
 
         Cage cage = new GCage();
@@ -124,5 +141,17 @@ public class ApiAuthController {
         captchaRepository.save(captchaCode);
 
         return new ResponseEntity(authService.getCaptchaResponse(secret, imageString), OK);
+    }
+
+    @PostMapping("/restore")
+    public ResponseEntity restorePassword(@RequestBody PasswordRestoreRequest passwordRequest){
+
+            return new ResponseEntity(authService.sendMailToRestorePassword(passwordRequest), OK);
+    }
+
+    @PostMapping("/password")
+    public ResponseEntity checkPasswordForRestore(@RequestBody PasswordRequest passwordRequest) {
+
+        return new ResponseEntity(authService.restorePassword(passwordRequest), OK);
     }
 }

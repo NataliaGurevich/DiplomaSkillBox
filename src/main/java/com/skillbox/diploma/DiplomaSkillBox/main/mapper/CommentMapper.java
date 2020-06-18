@@ -8,7 +8,9 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.UserIdNamePhotoRespons
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Date;
@@ -34,7 +36,8 @@ public class CommentMapper {
 
         CommentResponse commentResponse = new CommentResponse();
         commentResponse.setId(comment.getId());
-        commentResponse.setTime(output);
+//        commentResponse.setTime(output);
+        commentResponse.setTime(LocalDateTime.ofInstant(comment.getTime(), ZoneId.systemDefault()));
         commentResponse.setText(comment.getText());
         commentResponse.setUser(UserMapper.converterToNameIdNamePhoto(comment.getUser()));
 

@@ -3,6 +3,7 @@ package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.LikeDislikeRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +29,10 @@ public class ApiPostController {
     private final PostServiceMyPost postServiceMyPost;
     private final PostServiceById postServiceById;
     private final PostRepository postRepository;
+    private final LikeDislikeService likeDislikeService;
 
     @Autowired
-    public ApiPostController(PostAddService postService, PostServiceByMode postServiceByMode, PostServiceByTag postServiceByTag, PostServiceModeration postServiceModeration, AuthService authService, PostServiceBySearch postServiceBySearch, PostServiceByDate postServiceByDate, PostServiceMyPost postServiceMyPost, PostServiceById postServiceById, PostRepository postRepository) {
+    public ApiPostController(PostAddService postService, PostServiceByMode postServiceByMode, PostServiceByTag postServiceByTag, PostServiceModeration postServiceModeration, AuthService authService, PostServiceBySearch postServiceBySearch, PostServiceByDate postServiceByDate, PostServiceMyPost postServiceMyPost, PostServiceById postServiceById, PostRepository postRepository, LikeDislikeService likeDislikeService) {
         this.postService = postService;
         this.postServiceByMode = postServiceByMode;
         this.postServiceByTag = postServiceByTag;
@@ -41,6 +43,7 @@ public class ApiPostController {
         this.postServiceMyPost = postServiceMyPost;
         this.postServiceById = postServiceById;
         this.postRepository = postRepository;
+        this.likeDislikeService = likeDislikeService;
     }
 
     @GetMapping("")
@@ -133,5 +136,30 @@ public class ApiPostController {
             return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @PostMapping("/like")
+    public ResponseEntity like(@RequestBody LikeDislikeRequest likeDislikeRequest,
+                                    @CookieValue(value = "Token", defaultValue = "") String token) {
+        User currentUser = authService.getCurrentUser(token);
+
+        if (currentUser != null) {
+            return new ResponseEntity(likeDislikeService.setLikeDislike(likeDislikeRequest, true, currentUser), HttpStatus.OK);
+        } else {
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/dislike")
+    public ResponseEntity dislike(@RequestBody LikeDislikeRequest likeDislikeRequest,
+                               @CookieValue(value = "Token", defaultValue = "") String token) {
+        User currentUser = authService.getCurrentUser(token);
+
+        if (currentUser != null) {
+            return new ResponseEntity(likeDislikeService.setLikeDislike(likeDislikeRequest, false, currentUser), HttpStatus.OK);
+        } else {
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
 }
 

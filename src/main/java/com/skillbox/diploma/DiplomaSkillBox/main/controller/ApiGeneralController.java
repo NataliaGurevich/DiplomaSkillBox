@@ -1,11 +1,12 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.request.CommentRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceModeration;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.StatisticsService;
-import com.skillbox.diploma.DiplomaSkillBox.main.service.TagService;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorText;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorTextResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,15 +22,19 @@ public class ApiGeneralController {
     private final AuthService authService;
     private final PostServiceModeration postServiceModeration;
     private final StatisticsService statisticsService;
+    private final CommentService commentService;
+    private final GlobalSettingsRepository globalSettingsRepository;
 
     @Autowired
     public ApiGeneralController(TagService tagService, AuthService authService,
                                 PostServiceModeration postServiceModeration,
-                                StatisticsService statisticsService) {
+                                StatisticsService statisticsService, CommentService commentService, GlobalSettingsRepository globalSettingsRepository) {
         this.tagService = tagService;
         this.authService = authService;
         this.postServiceModeration = postServiceModeration;
         this.statisticsService = statisticsService;
+        this.commentService = commentService;
+        this.globalSettingsRepository = globalSettingsRepository;
     }
 
     @GetMapping("")
@@ -69,7 +74,30 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/statistics/all")
-    public ResponseEntity statisticsAll() {
-        return new ResponseEntity(statisticsService.allStatistics(), HttpStatus.OK);
+    public ResponseEntity statisticsAll(@CookieValue(value = "Token", defaultValue = "") String token) {
+
+        User currentUser = authService.getCurrentUser(token);
+        if (globalSettingsRepository.findSettingsValueByCode("STATISTICS_IS_PUBLIC") || currentUser != null) {
+            return new ResponseEntity(statisticsService.allStatistics(), HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/comment")
+    public ResponseEntity commentToPost(@RequestBody CommentRequest commentRequest,
+                                        @CookieValue(value = "Token", defaultValue = "") String token) {
+        User currentUser = authService.getCurrentUser(token);
+        if (currentUser != null) {
+            if (commentRequest.getText() == null || commentRequest.getText().length() < 3) {
+                return new ResponseEntity(new ErrorTextResponse(
+                        new ErrorText("Текст комментария не задан или слишком короткий")), HttpStatus.OK);
+            } else {
+                return new ResponseEntity(commentService.addComment(commentRequest, currentUser), HttpStatus.OK);
+            }
+        } else {
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
     }
 }
