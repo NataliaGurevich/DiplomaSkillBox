@@ -36,6 +36,7 @@ public class PostAddService {
     private final TagToPostRepository tagToPostRepository;
     private final GlobalSettingsRepository globalSettingsRepository;
 
+    @Autowired
     public PostAddService(PostRepository postRepository, PostCommentRepository postCommentRepository, TagRepository tagRepository, UserRepository userRepository, AuthService authService, TagToPostRepository tagToPostRepository, GlobalSettingsRepository globalSettingsRepository) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
@@ -45,9 +46,6 @@ public class PostAddService {
         this.tagToPostRepository = tagToPostRepository;
         this.globalSettingsRepository = globalSettingsRepository;
     }
-
-    @Autowired
-
 
     public ResultResponse addNewPost(PostAddRequest postAddRequest, String token) throws ParseException {
 
