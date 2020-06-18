@@ -9,6 +9,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorTextResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,9 @@ public class ApiGeneralController {
     private final StatisticsService statisticsService;
     private final CommentService commentService;
     private final GlobalSettingsRepository globalSettingsRepository;
+
+    @Value("${global.settings.statistics}")
+    private String statistics;
 
     @Autowired
     public ApiGeneralController(TagService tagService, AuthService authService,
@@ -68,6 +72,8 @@ public class ApiGeneralController {
             log.info("STATISTIC MY {}", currentUser);
             return new ResponseEntity(statisticsService.myStatistics(currentUser),
                     HttpStatus.OK);
+        } else if (currentUser == null && globalSettingsRepository.findSettingsValueByCode(statistics)) {
+            return new ResponseEntity(statisticsService.allStatistics(), HttpStatus.OK);
         } else {
             return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
         }
@@ -77,10 +83,9 @@ public class ApiGeneralController {
     public ResponseEntity statisticsAll(@CookieValue(value = "Token", defaultValue = "") String token) {
 
         User currentUser = authService.getCurrentUser(token);
-        if (globalSettingsRepository.findSettingsValueByCode("STATISTICS_IS_PUBLIC") || currentUser != null) {
+        if (globalSettingsRepository.findSettingsValueByCode(statistics) || currentUser != null) {
             return new ResponseEntity(statisticsService.allStatistics(), HttpStatus.OK);
-        }
-        else {
+        } else {
             return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
         }
     }
@@ -88,11 +93,12 @@ public class ApiGeneralController {
     @PostMapping("/comment")
     public ResponseEntity commentToPost(@RequestBody CommentRequest commentRequest,
                                         @CookieValue(value = "Token", defaultValue = "") String token) {
+        String errorMessage = "Текст комментария не задан или слишком короткий";
         User currentUser = authService.getCurrentUser(token);
         if (currentUser != null) {
             if (commentRequest.getText() == null || commentRequest.getText().length() < 3) {
                 return new ResponseEntity(new ErrorTextResponse(
-                        new ErrorText("Текст комментария не задан или слишком короткий")), HttpStatus.OK);
+                        new ErrorText(errorMessage)), HttpStatus.OK);
             } else {
                 return new ResponseEntity(commentService.addComment(commentRequest, currentUser), HttpStatus.OK);
             }
