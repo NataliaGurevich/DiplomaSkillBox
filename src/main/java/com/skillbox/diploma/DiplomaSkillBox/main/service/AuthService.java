@@ -2,6 +2,7 @@ package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.CaptchaRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRequest;
@@ -51,6 +52,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final CaptchaRepository captchaRepository;
     private final EmailService emailService;
+    private final GlobalSettingsRepository globalSettingsRepository;
     private Map<String, Long> sessions;
     private Map<String, Instant> codes;
 
@@ -63,13 +65,14 @@ public class AuthService {
             "<a href=\"/auth/restore\">Запросить ссылку снова</a>";
 
     @Autowired
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager, CaptchaRepository captchaRepository, Map<String, Long> sessions, EmailService emailService) {
+    public AuthService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager, CaptchaRepository captchaRepository, Map<String, Long> sessions, EmailService emailService, GlobalSettingsRepository globalSettingsRepository) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
         this.captchaRepository = captchaRepository;
         this.emailService = emailService;
+        this.globalSettingsRepository = globalSettingsRepository;
         this.sessions = new HashMap<>();
         this.codes = new HashMap<>();
     }
@@ -169,41 +172,46 @@ public class AuthService {
     }
 
     public TrueFalseResponse sendMailToRestorePassword(PasswordRestoreRequest passwordRequest) {
-
         String email = passwordRequest.getEmail();
         User user = userRepository.findByEmail(email);
         final int MAXIMUM_LENGTH = 45;
 
-        if (!StringUtils.isEmpty(email) && user != null) {
+        if (globalSettingsRepository.findSettingsValueByCode("MULTIUSER_MODE") || user.getIsModerator()) {
 
-            Random random = new Random();
-            String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
-            StringBuilder generatedCode = new StringBuilder();
-            for (int i = 0; i < MAXIMUM_LENGTH; i++) {
-                int randonSequence = random.nextInt(CHARACTERS.length());
-                generatedCode.append(CHARACTERS.charAt(randonSequence));
+            if (!StringUtils.isEmpty(email) && user != null) {
+
+                Random random = new Random();
+                String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
+                StringBuilder generatedCode = new StringBuilder();
+                for (int i = 0; i < MAXIMUM_LENGTH; i++) {
+                    int randonSequence = random.nextInt(CHARACTERS.length());
+                    generatedCode.append(CHARACTERS.charAt(randonSequence));
+                }
+
+                String code = generatedCode.toString();
+                String subj = "Welcome to DevPub!";
+                String message = String.format("Hello, %s! \n" +
+                                "Welcome to DevPub. Please, visit next link %s/login/change-password/%s to restore password",
+                        user.getName(), host, code);
+
+                log.info("CODE {} to {} is sent", code, email);
+
+                boolean result = emailService.sendMessage(email, subj, message);
+                if (result){
+                    user.setCode(code);
+                    userRepository.save(user);
+                    codes.put(code, Instant.now());
+                }
+
+                log.info("MAIL TO {} IS SENT {}", user.getName(), result);
+
+                return new TrueFalseResponse(result);
             }
-
-            String code = generatedCode.toString();
-            String subj = "Welcome to DevPub!";
-            String message = String.format("Hello, %s! \n" +
-                    "Welcome to DevPub. Please, visit next link %s/login/change-password/%s to restore password",
-                    user.getName(), host, code);
-
-            log.info("CODE {} to {} is sent", code, email);
-
-            boolean result = emailService.sendMessage(email, subj, message);
-            if (result){
-                user.setCode(code);
-                userRepository.save(user);
-                codes.put(code, Instant.now());
-            }
-
-            log.info("MAIL TO {} IS SENT {}", user.getName(), result);
-
-            return new TrueFalseResponse(result);
+            return new TrueFalseResponse(false);
         }
-        return new TrueFalseResponse(false);
+        else {
+            return new TrueFalseResponse(false);
+        }
     }
 
     public ResponseEntity restorePassword(PasswordRequest passwordRequest) {

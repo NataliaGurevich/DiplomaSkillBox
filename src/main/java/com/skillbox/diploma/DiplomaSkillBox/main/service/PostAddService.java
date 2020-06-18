@@ -28,23 +28,26 @@ import java.util.Set;
 @Transactional
 public class PostAddService {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final TagRepository tagRepository;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final TagToPostRepository tagToPostRepository;
+    private final GlobalSettingsRepository globalSettingsRepository;
+
+    public PostAddService(PostRepository postRepository, PostCommentRepository postCommentRepository, TagRepository tagRepository, UserRepository userRepository, AuthService authService, TagToPostRepository tagToPostRepository, GlobalSettingsRepository globalSettingsRepository) {
+        this.postRepository = postRepository;
+        this.postCommentRepository = postCommentRepository;
+        this.tagRepository = tagRepository;
+        this.userRepository = userRepository;
+        this.authService = authService;
+        this.tagToPostRepository = tagToPostRepository;
+        this.globalSettingsRepository = globalSettingsRepository;
+    }
 
     @Autowired
-    private PostCommentRepository postCommentRepository;
 
-    @Autowired
-    private TagRepository tagRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private TagToPostRepository tagToPostRepository;
 
     public ResultResponse addNewPost(PostAddRequest postAddRequest, String token) throws ParseException {
 
@@ -78,7 +81,10 @@ public class PostAddService {
             post.setIsActive(isActive);
             post.setTitle(title);
             post.setText(text);
-            post.setModerationStatus("NEW");
+
+            post.setModerationStatus(globalSettingsRepository.findSettingsValueByCode("POST_PREMODERATION") ?
+                    "NEW" : "ACCEPTED");
+
             post.setUser(currentUser);
             post.setTime(instant.isBefore(Instant.now()) ? Instant.now() : instant);
             post.setModerator(null);

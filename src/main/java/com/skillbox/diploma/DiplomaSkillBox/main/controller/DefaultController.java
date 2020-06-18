@@ -120,6 +120,7 @@ public class DefaultController {
 
         User currentUser = authService.getCurrentUser(token);
 
+
         if (currentUser != null) {
             if (image != null && !image.isEmpty()) {
                 return new ResponseEntity(fileUploadService.fileUpload(image), OK);
