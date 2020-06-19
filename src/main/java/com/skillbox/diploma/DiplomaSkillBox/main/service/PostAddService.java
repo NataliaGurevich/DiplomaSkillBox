@@ -10,6 +10,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,10 @@ public class PostAddService {
     private final TagToPostRepository tagToPostRepository;
     private final GlobalSettingsRepository globalSettingsRepository;
 
+    @Value("${global.settings.premoderation}")
+    private String premoderation;
+
+    @Autowired
     public PostAddService(PostRepository postRepository, PostCommentRepository postCommentRepository, TagRepository tagRepository, UserRepository userRepository, AuthService authService, TagToPostRepository tagToPostRepository, GlobalSettingsRepository globalSettingsRepository) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
@@ -45,9 +50,6 @@ public class PostAddService {
         this.tagToPostRepository = tagToPostRepository;
         this.globalSettingsRepository = globalSettingsRepository;
     }
-
-    @Autowired
-
 
     public ResultResponse addNewPost(PostAddRequest postAddRequest, String token) throws ParseException {
 
@@ -82,7 +84,7 @@ public class PostAddService {
             post.setTitle(title);
             post.setText(text);
 
-            post.setModerationStatus(globalSettingsRepository.findSettingsValueByCode("POST_PREMODERATION") ?
+            post.setModerationStatus(globalSettingsRepository.findSettingsValueByCode(premoderation) ?
                     "NEW" : "ACCEPTED");
 
             post.setUser(currentUser);

@@ -44,3 +44,7 @@ com.cloudinary.cloud_name: dxywt3ld7
 com.cloudinary.api_key: 372888264999633
 com.cloudinary.api_secret: ZJfDjL0K6wxdvtZr-cz0ua0-VSY
 com.cloudinari.url: http://res.cloudinary.com/
+
+global.settings.multiuser: MULTIUSER_MODE
+global.settings.premoderation: POST_PREMODERATION
+global.settings.statistics: STATISTICS_IS_PUBLIC

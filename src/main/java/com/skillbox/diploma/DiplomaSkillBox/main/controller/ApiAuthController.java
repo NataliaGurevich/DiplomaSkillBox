@@ -8,6 +8,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.CaptchaRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRestoreRequest;
@@ -17,9 +18,11 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.TrueFalseResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceByMode;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -46,14 +49,21 @@ public class ApiAuthController {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final PostRepository postRepository;
     private final GlobalSettingsRepository globalSettingsRepository;
+    private final PostServiceByMode postServiceByMode;
+    private final UserRepository userRepository;
+
+    @Value("${global.settings.multiuser}")
+    private String multiuser;
 
     @Autowired
-    public ApiAuthController(AuthService authService, CaptchaRepository captchaRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PostRepository postRepository, GlobalSettingsRepository globalSettingsRepository) {
+    public ApiAuthController(AuthService authService, CaptchaRepository captchaRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PostRepository postRepository, GlobalSettingsRepository globalSettingsRepository, PostServiceByMode postServiceByMode, UserRepository userRepository) {
         this.authService = authService;
         this.captchaRepository = captchaRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.postRepository = postRepository;
         this.globalSettingsRepository = globalSettingsRepository;
+        this.postServiceByMode = postServiceByMode;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/check")
@@ -80,33 +90,38 @@ public class ApiAuthController {
     public ResponseEntity login(@RequestBody Login loginRequest,
                                 HttpServletRequest request, HttpServletResponse response) {
 
-        User loggedUser = authService.login(loginRequest, request, response);
+        User user = userRepository.findByEmail(loginRequest.getEmail());
+        boolean isMultiUser = globalSettingsRepository.findSettingsValueByCode(multiuser);
+        boolean isModerator = user != null && user.getIsModerator();
 
-        if (globalSettingsRepository.findSettingsValueByCode("MULTIUSER_MODE") || loggedUser.getIsModerator()) {
+        if ((isMultiUser && user != null) || (!isMultiUser && isModerator)) {
+
+            User loggedUser = authService.login(loginRequest, request, response);
 
             if (loggedUser != null) {
-
                 AuthResponseTrue authResponse = new AuthResponseTrue();
                 int count = postRepository.findNewPosts().orElse(0);
                 authResponse.setUser(UserMapper.converterToFullName(loggedUser, loggedUser.getIsModerator() ? count : 0));
                 return new ResponseEntity(authResponse, OK);
             }
-            ResultResponse error = new ResultResponse();
-            error.setMessage("Invalid email or password");
-            return new ResponseEntity(error, OK);
-        }
-        else {
-            return new ResponseEntity(null, HttpStatus.OK);
+            else {
+
+                ResultResponse error = new ResultResponse();
+                error.setMessage("Invalid email or password");
+                return new ResponseEntity(error, OK);
+            }
+
+        } else {
+            return new ResponseEntity(null, HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity registration(@RequestBody Registration registrationRequest) {
 
-        if (globalSettingsRepository.findSettingsValueByCode("MULTIUSER_MODE")) {
+        if (globalSettingsRepository.findSettingsValueByCode(multiuser)) {
             return authService.registration(registrationRequest);
-        }
-        else {
+        } else {
             return new ResponseEntity(null, HttpStatus.OK);
         }
     }
@@ -144,9 +159,9 @@ public class ApiAuthController {
     }
 
     @PostMapping("/restore")
-    public ResponseEntity restorePassword(@RequestBody PasswordRestoreRequest passwordRequest){
+    public ResponseEntity restorePassword(@RequestBody PasswordRestoreRequest passwordRequest) {
 
-            return new ResponseEntity(authService.sendMailToRestorePassword(passwordRequest), OK);
+        return new ResponseEntity(authService.sendMailToRestorePassword(passwordRequest), OK);
     }
 
     @PostMapping("/password")
