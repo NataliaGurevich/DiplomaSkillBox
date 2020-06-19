@@ -10,6 +10,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
@@ -23,20 +24,25 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceById {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final TagRepository tagRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostVoteRepository postVoteRepository;
+    private final TagToPostRepository tagToPostRepository;
+    private final GlobalSettingsRepository globalSettingsRepository;
+
+    @Value("${global.settings.premoderation}")
+    private String premoderation;
 
     @Autowired
-    private TagRepository tagRepository;
-
-    @Autowired
-    private PostCommentRepository postCommentRepository;
-
-    @Autowired
-    private PostVoteRepository postVoteRepository;
-
-    @Autowired
-    private TagToPostRepository tagToPostRepository;
+    public PostServiceById(PostRepository postRepository, TagRepository tagRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, GlobalSettingsRepository globalSettingsRepository) {
+        this.postRepository = postRepository;
+        this.tagRepository = tagRepository;
+        this.postCommentRepository = postCommentRepository;
+        this.postVoteRepository = postVoteRepository;
+        this.tagToPostRepository = tagToPostRepository;
+        this.globalSettingsRepository = globalSettingsRepository;
+    }
 
     public PostCommentsResponse getPostById(Long id) {
 
@@ -104,7 +110,8 @@ public class PostServiceById {
                 post.setTitle(title);
                 post.setText(text);
                 if(post.getUser().equals(currentUser)) {
-                    post.setModerationStatus("NEW");
+                    post.setModerationStatus(globalSettingsRepository.findSettingsValueByCode(premoderation) ?
+                            "NEW" : "ACCEPTED");
                     post.setModerator(null);
                 }
                 post.setTime(instant.isBefore(Instant.now()) ? Instant.now() : instant);

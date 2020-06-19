@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -115,15 +116,17 @@ public class PostAddService {
 
         if (tagsName != null && tagsName.size() > 0) {
             for (String tagItem : tagsName) {
-                Tag tag;
-                if (!currentTags.contains(tagItem.toUpperCase())) {
-                    tag = new Tag();
-                    tag.setName(tagItem.toUpperCase());
-                    tagRepository.save(tag);
-                } else {
-                    tag = tagRepository.findIdByName(tagItem.toUpperCase());
+                if (!StringUtils.isEmpty(tagItem)) {
+                    Tag tag;
+                    if (!currentTags.contains(tagItem.toUpperCase())) {
+                        tag = new Tag();
+                        tag.setName(tagItem.toUpperCase());
+                        tagRepository.save(tag);
+                    } else {
+                        tag = tagRepository.findIdByName(tagItem.toUpperCase());
+                    }
+                    tags.add(tag);
                 }
-                tags.add(tag);
             }
         }
         return tags;
