@@ -166,4 +166,9 @@ public class DefaultController {
         }
         return new ResponseEntity(null, UNAUTHORIZED);
     }
+    
+    @RequestMapping(method = {RequestMethod.OPTIONS, RequestMethod.GET}, value = "/**/{path:[^\\.]*}")
+    public String redirectToIndex() {
+        return "forward:/";
+    }
 }
