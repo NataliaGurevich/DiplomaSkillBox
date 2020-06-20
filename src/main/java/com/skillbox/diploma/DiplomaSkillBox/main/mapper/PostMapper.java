@@ -9,6 +9,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import lombok.Data;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -40,7 +41,7 @@ public class PostMapper {
 
         String text = post.getText();
         Document doc = Jsoup.parse(text);
-        text = doc.select("span").text();
+        text = StringUtils.isEmpty(doc.select("span").text()) ? text : doc.select("span").text();
         text = text.length() < 150 ? text : text.substring(0, 150);
         postResponse.setAnnounce(text);
         postResponse.setLikeCount(likeCount);
@@ -68,7 +69,7 @@ public class PostMapper {
 
         String text = post.getText();
         Document doc = Jsoup.parse(text);
-        text = doc.select("span").text();
+        text = StringUtils.isEmpty(doc.select("span").text()) ? text : doc.select("span").text();
         text = text.length() < 150 ? text : text.substring(0, 150);
         postCommentsResponse.setAnnounce(text);
         postCommentsResponse.setText(post.getText());
@@ -108,7 +109,7 @@ public class PostMapper {
 
         String text = post.getText();
         Document doc = Jsoup.parse(text);
-        text = doc.select("span").text();
+        text = StringUtils.isEmpty(doc.select("span").text()) ? text : doc.select("span").text();
         text = text.length() < 150 ? text : text.substring(0, 150);
         postByTagResponse.setAnnounce(text);
         postByTagResponse.setLikeCount(likeCount);
