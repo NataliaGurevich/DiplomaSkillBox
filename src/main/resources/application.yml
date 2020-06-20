@@ -1,7 +1,9 @@
-spring.datasource.url: jdbc:postgresql://localhost:5432/blog_engine
-spring.datasource.username: natalia
-spring.datasource.password: test123
+#spring.datasource.url: jdbc:postgresql://localhost:5432/blog_engine
+spring.datasource.url: ${jdbc:DATASOURCE_URL:postgresql://localhost:5432/blog_engine}
+spring.datasource.username: ${DATASOURCE_USERNAME:natalia}
+spring.datasource.password: ${DATASOURCE_PASSWORD:test123}
 spring.liquibase.change-log: classpath:/db/changelog/changelog-master.xml
+server.port: ${PORT:8080}
 
 spring.datasource.driver-class-name: org.postgresql.Driver
 spring.jpa.database-platform: org.hibernate.dialect.PostgreSQL10Dialect
@@ -35,7 +37,7 @@ mail.debug: true
 spring.mail.properties.mail.smtp.auth: true
 spring.mail.properties.mail.smtps.starttls.enable: true
 
-host: http://localhost:8080
+host: ${MAIL_HOST:http://localhost:8080}
 
 #Cloudinary
 #username=DevPub
