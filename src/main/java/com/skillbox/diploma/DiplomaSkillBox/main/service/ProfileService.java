@@ -55,11 +55,11 @@ public class ProfileService {
             result = false;
         }
         if (!password.equals("") && password.length() < 6) {
-            message.setEmail(PASSWORD_ERROR);
+            message.setPassword(PASSWORD_ERROR);
             result = false;
         }
         if (photo != null && photo.getBytes().length > 5 * 1024 * 1024) {
-            message.setEmail(PHOTO_ERROR);
+            message.setPhoto(PHOTO_ERROR);
             result = false;
         }
         if (!result) {

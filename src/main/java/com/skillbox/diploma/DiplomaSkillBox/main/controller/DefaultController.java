@@ -3,6 +3,8 @@ package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.GlobalSettingsRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.ProfileRequest;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorListResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.GlobalSettingsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
@@ -119,11 +121,18 @@ public class DefaultController {
                                       @CookieValue(value = "Token", defaultValue = "") String token) throws IOException {
 
         User currentUser = authService.getCurrentUser(token);
-
+        String IMAGE_ERROR = "Картинка слишком большая, нужно не более 5Mb";
 
         if (currentUser != null) {
             if (image != null && !image.isEmpty()) {
-                return new ResponseEntity(fileUploadService.fileUpload(image), OK);
+                if (image.getBytes().length <= (5 * 1024 * 1024)) {
+                    return new ResponseEntity(fileUploadService.fileUpload(image), OK);
+                }
+                else {
+                    ErrorMessage message = new ErrorMessage();
+                    message.setPhoto(IMAGE_ERROR);
+                    return new ResponseEntity(new ErrorListResponse(message), OK);
+                }
             }
         }
         return new ResponseEntity(null, UNAUTHORIZED);
@@ -166,7 +175,7 @@ public class DefaultController {
         }
         return new ResponseEntity(null, UNAUTHORIZED);
     }
-    
+
     @RequestMapping(method = {RequestMethod.OPTIONS, RequestMethod.GET}, value = "/**/{path:[^\\.]*}")
     public String redirectToIndex() {
         return "forward:/";
