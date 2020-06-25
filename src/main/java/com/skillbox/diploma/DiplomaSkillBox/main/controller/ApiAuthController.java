@@ -127,8 +127,8 @@ public class ApiAuthController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity logout() {
-        authService.logout();
+    public ResponseEntity logout(@CookieValue(value = "Token", defaultValue = "") String token) {
+        authService.logout(token);
         return new ResponseEntity(new TrueFalseResponse(true), OK);
     }
 

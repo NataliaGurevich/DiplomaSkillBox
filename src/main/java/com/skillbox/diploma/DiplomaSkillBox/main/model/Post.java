@@ -21,7 +21,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "is_active", nullable = false, columnDefinition = "false")
+    @Column(name = "is_active", nullable = false, columnDefinition = "boolean default false")
     private Boolean isActive;
 
     @Column(name = "moderation_status", nullable = false, columnDefinition = "NEW")

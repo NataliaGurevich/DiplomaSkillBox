@@ -114,8 +114,11 @@ public class AuthService {
         return null;
     }
 
-    public void logout() {
-        sessions = new HashMap<>();
+    public void logout(String token) {
+        for (String item : sessions.keySet()) {
+            if (item.equals(token))
+            sessions.remove(token);
+        }
     }
 
     public ResponseEntity registration(Registration registrationRequest) {
@@ -197,7 +200,7 @@ public class AuthService {
                 log.info("CODE {} to {} is sent", code, email);
 
                 boolean result = emailService.sendMessage(email, subj, message);
-                if (result){
+                if (result) {
                     user.setCode(code);
                     userRepository.save(user);
                     codes.put(code, Instant.now());
@@ -208,8 +211,7 @@ public class AuthService {
                 return new TrueFalseResponse(result);
             }
             return new TrueFalseResponse(false);
-        }
-        else {
+        } else {
             return new TrueFalseResponse(false);
         }
     }
@@ -247,7 +249,7 @@ public class AuthService {
         return new ResponseEntity(new TrueFalseResponse(true), HttpStatus.OK);
     }
 
-    public Map<String, Instant> getCodes(){
+    public Map<String, Instant> getCodes() {
         return codes;
     }
 

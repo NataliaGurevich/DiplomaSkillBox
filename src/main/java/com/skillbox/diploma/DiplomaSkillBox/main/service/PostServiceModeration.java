@@ -25,15 +25,16 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceModeration {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final PostVoteRepository postVoteRepository;
+    private final PostCommentRepository postCommentRepository;
 
     @Autowired
-    private PostVoteRepository postVoteRepository;
-
-    @Autowired
-    private PostCommentRepository postCommentRepository;
-
+    public PostServiceModeration(PostRepository postRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository) {
+        this.postRepository = postRepository;
+        this.postVoteRepository = postVoteRepository;
+        this.postCommentRepository = postCommentRepository;
+    }
 
     public PostsResponse getSetPosts(int offset, int limit, String status, User currentUser) {
 

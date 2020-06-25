@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -33,29 +34,45 @@ public class LikeDislikeService {
         User postOwner = post.getUser();
 
         PostVote postVoteWithLike;
+        boolean valueBefore;
 
-        PostVote postVote = postVoteRepository.findByPostAndUser(postId, postOwner.getId()).orElse(null);
+        Optional<PostVote> postVote = postVoteRepository.findByPostAndUser(postId, currentUser.getId());
 
         if (postOwner != currentUser) {
-            if (postVote == null) {
-                postVote = new PostVote();
-                postVote.setPost(post);
-                postVote.setUser(currentUser);
-                postVote.setTime(Instant.now());
-                postVote.setValue(value);
+            PostVote postLikeDislike;
+            if (postVote.isEmpty()) {
+                return new TrueFalseResponse(setNewValue(post, currentUser, value));
             } else {
-                postVote.setTime(Instant.now());
-                postVote.setValue(value);
+                postLikeDislike = postVote.get();
+                valueBefore = postLikeDislike.getValue();
+                if (valueBefore == value) {
+                    return new TrueFalseResponse(false);
+                }
+                else {
+                    postLikeDislike.setTime(Instant.now());
+                    postLikeDislike.setValue(value);
+                    postVoteWithLike = postVoteRepository.save(postLikeDislike);
+
+                    if (postVoteWithLike != null) {
+                        return new TrueFalseResponse(true);
+                    } else {
+                        return new TrueFalseResponse(false);
+                    }
+                }
             }
-            postVoteWithLike = postVoteRepository.save(postVote);
-            if (postVoteWithLike == null) {
-                return new TrueFalseResponse(false);
-            }
-            return new TrueFalseResponse(true);
         } else {
             return new TrueFalseResponse(false);
         }
+    }
 
+    public boolean setNewValue(Post post, User currentUser, boolean value){
+        PostVote postLikeDislike = new PostVote();
+        postLikeDislike.setPost(post);
+        postLikeDislike.setUser(currentUser);
+        postLikeDislike.setTime(Instant.now());
+        postLikeDislike.setValue(value);
+        PostVote postVoteWithLike = postVoteRepository.save(postLikeDislike);
 
+        return postVoteWithLike == null ? false : true;
     }
 }

@@ -14,11 +14,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
 
     @Value("${spring.email.username}")
     private String mailServerUsername;
+
+    @Autowired
+    public EmailService(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
 
     public boolean sendMessage(String to, String subject, String text) {
 
