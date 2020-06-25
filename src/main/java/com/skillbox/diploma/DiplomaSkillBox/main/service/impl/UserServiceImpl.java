@@ -20,10 +20,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
 
-    @Autowired
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
     private final UserRepository userRepository;
 
     @Autowired
