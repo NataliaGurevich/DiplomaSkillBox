@@ -1,5 +1,5 @@
 #spring.datasource.url: jdbc:postgresql://localhost:5432/blog_engine
-spring.datasource.url: ${jdbc:DATASOURCE_URL:postgresql://localhost:5432/blog_engine}
+spring.datasource.url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/blog_engine}
 spring.datasource.username: ${DATASOURCE_USERNAME:natalia}
 spring.datasource.password: ${DATASOURCE_PASSWORD:test123}
 spring.liquibase.change-log: classpath:/db/changelog/changelog-master.xml
@@ -28,9 +28,9 @@ cron.expression.code.del: "0 0 */1 * * *"
 hibernate.search.default.directory_provider: filesystem
 hibernate.search.default.indexBase: /data/index/default
 
-spring.email.host: smtp.yandex.ua
-spring.email.username: devpub@sendel.ru
-spring.email.password: s&vnEN}>8rUz\9yM
+spring.email.host: ${EMAIL_SMTP:smtp}
+spring.email.username: ${EMAIL_USERNAME:userName}
+spring.email.password: ${EMAIL_PASSWORD:password}
 spring.email.port: 465
 spring.email.protocol: smtps
 mail.debug: true
@@ -39,12 +39,9 @@ spring.mail.properties.mail.smtps.starttls.enable: true
 
 host: ${MAIL_HOST:http://localhost:8080}
 
-#Cloudinary
-#username=DevPub
-#password=#5P!EtPdZ4Pz2nR
-com.cloudinary.cloud_name: dxywt3ld7
-com.cloudinary.api_key: 372888264999633
-com.cloudinary.api_secret: ZJfDjL0K6wxdvtZr-cz0ua0-VSY
+com.cloudinary.cloud_name: ${CLOUDINARY_NAME:name}
+com.cloudinary.api_key: ${CLOUDINARY_KEY:key}
+com.cloudinary.api_secret: ${CLOUDINARY_SECRET:secret}
 com.cloudinari.url: http://res.cloudinary.com/
 
 global.settings.multiuser: MULTIUSER_MODE

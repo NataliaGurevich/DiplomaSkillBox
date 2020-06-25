@@ -31,21 +31,20 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceBySearch {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostVoteRepository postVoteRepository;
+    private final TagToPostRepository tagToPostRepository;
+    private final EntityManager entityManager;
 
     @Autowired
-    private PostCommentRepository postCommentRepository;
-
-    @Autowired
-    private PostVoteRepository postVoteRepository;
-
-    @Autowired
-    private TagToPostRepository tagToPostRepository;
-
-    @Autowired
-    private EntityManager entityManager;
-
+    public PostServiceBySearch(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, EntityManager entityManager) {
+        this.postRepository = postRepository;
+        this.postCommentRepository = postCommentRepository;
+        this.postVoteRepository = postVoteRepository;
+        this.tagToPostRepository = tagToPostRepository;
+        this.entityManager = entityManager;
+    }
 
     public PostsResponse getPostsBySearch(int offset, int limit, String querySearch) throws InterruptedException {
 

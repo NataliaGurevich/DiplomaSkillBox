@@ -24,14 +24,16 @@ import java.util.List;
 @Transactional
 public class TagService {
 
-    @Autowired
-    private TagRepository tagRepository;
+    private final TagRepository tagRepository;
+    private final PostRepository postRepository;
+    private final TagToPostRepository tagToPostRepository;
 
     @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private TagToPostRepository tagToPostRepository;
+    public TagService(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository) {
+        this.tagRepository = tagRepository;
+        this.postRepository = postRepository;
+        this.tagToPostRepository = tagToPostRepository;
+    }
 
     private List<TagResponse> getListTags(String query) {
         List<TagResponse> tagsWeights = new ArrayList<>();

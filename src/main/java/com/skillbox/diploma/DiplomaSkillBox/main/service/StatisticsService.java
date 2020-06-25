@@ -17,11 +17,14 @@ import java.util.List;
 @Service
 public class StatisticsService {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final PostVoteRepository postVoteRepository;
 
     @Autowired
-    private PostVoteRepository postVoteRepository;
+    public StatisticsService(PostRepository postRepository, PostVoteRepository postVoteRepository) {
+        this.postRepository = postRepository;
+        this.postVoteRepository = postVoteRepository;
+    }
 
     public StatisticResponse myStatistics(User currentUser){
 

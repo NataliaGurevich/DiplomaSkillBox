@@ -16,7 +16,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "is_moderator", columnDefinition = "false")
+    @Column(name = "is_moderator", columnDefinition = "boolean default false")
     private Boolean isModerator;
 
     @Column(name = "reg_time", nullable = false)

@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class TrueFalseResponse {
 
-    private Boolean result;
+    private boolean result;
 }

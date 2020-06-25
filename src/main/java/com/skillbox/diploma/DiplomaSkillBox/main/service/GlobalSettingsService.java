@@ -19,8 +19,13 @@ import java.util.List;
 @Transactional
 public class GlobalSettingsService {
 
+
+    private final GlobalSettingsRepository globalSettingsRepository;
+
     @Autowired
-    GlobalSettingsRepository globalSettingsRepository;
+    public GlobalSettingsService(GlobalSettingsRepository globalSettingsRepository) {
+        this.globalSettingsRepository = globalSettingsRepository;
+    }
 
     public GlobalSettingsResponse globalSettingsResponse() {
 

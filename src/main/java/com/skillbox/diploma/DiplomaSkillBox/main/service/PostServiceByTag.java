@@ -23,20 +23,20 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceByTag {
 
-    @Autowired
-    private TagRepository tagRepository;
-
-    private PostRepository postRepository;
-
-    @Autowired
-    private TagToPostRepository tagToPostRepository;
+    private final TagRepository tagRepository;
+    private final PostRepository postRepository;
+    private final TagToPostRepository tagToPostRepository;
+    private final PostVoteRepository postVoteRepository;
+    private final PostCommentRepository postCommentRepository;
 
     @Autowired
-    private PostVoteRepository postVoteRepository;
-
-    @Autowired
-    private PostCommentRepository postCommentRepository;
-
+    public PostServiceByTag(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository) {
+        this.tagRepository = tagRepository;
+        this.postRepository = postRepository;
+        this.tagToPostRepository = tagToPostRepository;
+        this.postVoteRepository = postVoteRepository;
+        this.postCommentRepository = postCommentRepository;
+    }
 
     public PostsResponse getSetPosts(int offset, int limit, String tagName) {
 

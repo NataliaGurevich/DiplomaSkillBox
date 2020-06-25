@@ -24,14 +24,16 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceByDate {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostVoteRepository postVoteRepository;
 
     @Autowired
-    private PostCommentRepository postCommentRepository;
-
-    @Autowired
-    private PostVoteRepository postVoteRepository;
+    public PostServiceByDate(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository) {
+        this.postRepository = postRepository;
+        this.postCommentRepository = postCommentRepository;
+        this.postVoteRepository = postVoteRepository;
+    }
 
     public PostsResponse getPostsByDate(int offset, int limit, String day) {
 

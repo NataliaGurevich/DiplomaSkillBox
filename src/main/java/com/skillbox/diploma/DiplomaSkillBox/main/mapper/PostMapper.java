@@ -40,8 +40,7 @@ public class PostMapper {
         postResponse.setTitle(post.getTitle());
 
         String text = post.getText();
-        Document doc = Jsoup.parse(text);
-        text = StringUtils.isEmpty(doc.select("span").text()) ? text : doc.select("span").text();
+        text = StringUtils.isEmpty(Jsoup.parse(text).text()) ? text : Jsoup.parse(text).text();
         text = text.length() < 150 ? text : text.substring(0, 150);
         postResponse.setAnnounce(text);
         postResponse.setLikeCount(likeCount);
@@ -68,8 +67,7 @@ public class PostMapper {
         postCommentsResponse.setTitle(post.getTitle());
 
         String text = post.getText();
-        Document doc = Jsoup.parse(text);
-        text = StringUtils.isEmpty(doc.select("span").text()) ? text : doc.select("span").text();
+        text = StringUtils.isEmpty(Jsoup.parse(text).text()) ? text : Jsoup.parse(text).text();
         text = text.length() < 150 ? text : text.substring(0, 150);
         postCommentsResponse.setAnnounce(text);
         postCommentsResponse.setText(post.getText());
@@ -108,8 +106,7 @@ public class PostMapper {
         postByTagResponse.setTitle(post.getTitle());
 
         String text = post.getText();
-        Document doc = Jsoup.parse(text);
-        text = StringUtils.isEmpty(doc.select("span").text()) ? text : doc.select("span").text();
+        text = StringUtils.isEmpty(Jsoup.parse(text).text()) ? text : Jsoup.parse(text).text();
         text = text.length() < 150 ? text : text.substring(0, 150);
         postByTagResponse.setAnnounce(text);
         postByTagResponse.setLikeCount(likeCount);
