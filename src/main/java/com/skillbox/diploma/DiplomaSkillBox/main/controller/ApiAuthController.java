@@ -1,9 +1,6 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
-import com.github.cage.Cage;
-import com.github.cage.GCage;
 import com.skillbox.diploma.DiplomaSkillBox.main.mapper.UserMapper;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.CaptchaCode;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.CaptchaRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
@@ -13,14 +10,11 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRestoreRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.TrueFalseResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
+import com.skillbox.diploma.DiplomaSkillBox.main.service.CaptchaService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.PostServiceByMode;
 import lombok.extern.slf4j.Slf4j;
-import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,14 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Base64;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -51,12 +40,13 @@ public class ApiAuthController {
     private final GlobalSettingsRepository globalSettingsRepository;
     private final PostServiceByMode postServiceByMode;
     private final UserRepository userRepository;
+    private final CaptchaService captchaService;
 
     @Value("${global.settings.multiuser}")
     private String multiuser;
 
     @Autowired
-    public ApiAuthController(AuthService authService, CaptchaRepository captchaRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PostRepository postRepository, GlobalSettingsRepository globalSettingsRepository, PostServiceByMode postServiceByMode, UserRepository userRepository) {
+    public ApiAuthController(AuthService authService, CaptchaRepository captchaRepository, BCryptPasswordEncoder bCryptPasswordEncoder, PostRepository postRepository, GlobalSettingsRepository globalSettingsRepository, PostServiceByMode postServiceByMode, UserRepository userRepository, CaptchaService captchaService) {
         this.authService = authService;
         this.captchaRepository = captchaRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -64,6 +54,7 @@ public class ApiAuthController {
         this.globalSettingsRepository = globalSettingsRepository;
         this.postServiceByMode = postServiceByMode;
         this.userRepository = userRepository;
+        this.captchaService = captchaService;
     }
 
     @GetMapping("/check")
@@ -134,39 +125,18 @@ public class ApiAuthController {
 
     @GetMapping("/captcha")
     public ResponseEntity<CaptchaResponse> captcha() throws IOException {
-        final int CAPTCHA_WIDTH = 100;
-        final int CAPTCHA_HEIGHT = 35;
-
-        String token = Integer.toString((int) (Math.random() * 100_000) + (int) Math.random() * 100_000);
-        String secret = bCryptPasswordEncoder.encode(token);
-
-        Cage cage = new GCage();
-        BufferedImage image = cage.drawImage(token);
-        image = Scalr.resize(image, CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", bos);
-        byte[] imageBytes = bos.toByteArray();
-        String imageString = Base64.getEncoder().encodeToString(imageBytes);
-
-        CaptchaCode captchaCode = new CaptchaCode();
-        captchaCode.setTime(Instant.now());
-        captchaCode.setCode(token);
-        captchaCode.setSecretCode(secret);
-        captchaRepository.save(captchaCode);
-
-        return new ResponseEntity(authService.getCaptchaResponse(secret, imageString), OK);
+        return captchaService.createCaptcha();
     }
 
     @PostMapping("/restore")
-    public ResponseEntity restorePassword(@RequestBody PasswordRestoreRequest passwordRequest) {
+    public ResponseEntity<ResponseBasic> restorePassword(@RequestBody PasswordRestoreRequest passwordRequest) {
 
-        return new ResponseEntity(authService.sendMailToRestorePassword(passwordRequest), OK);
+        return authService.sendMailToRestorePassword(passwordRequest);
     }
 
     @PostMapping("/password")
-    public ResponseEntity checkPasswordForRestore(@RequestBody PasswordRequest passwordRequest) {
+    public ResponseEntity<ResponseBasic> checkPasswordForRestore(@RequestBody PasswordRequest passwordRequest) {
 
-        return new ResponseEntity(authService.restorePassword(passwordRequest), OK);
+        return authService.restorePassword(passwordRequest);
     }
 }

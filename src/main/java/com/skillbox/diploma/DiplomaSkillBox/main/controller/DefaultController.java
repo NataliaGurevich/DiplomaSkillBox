@@ -117,23 +117,14 @@ public class DefaultController {
 
     //    @PostMapping(value = "/api/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PostMapping(value = "/api/image")
-    public ResponseEntity uploadImage(@RequestParam("image") MultipartFile image,
+    public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile image,
                                       @CookieValue(value = "Token", defaultValue = "") String token) throws IOException {
 
         User currentUser = authService.getCurrentUser(token);
-        String IMAGE_ERROR = "Картинка слишком большая, нужно не более 5Mb";
 
         if (currentUser != null) {
-            if (image != null && !image.isEmpty()) {
-                if (image.getBytes().length <= (5 * 1024 * 1024)) {
-                    return new ResponseEntity(fileUploadService.fileUpload(image), OK);
-                }
-                else {
-                    ErrorMessage message = new ErrorMessage();
-                    message.setPhoto(IMAGE_ERROR);
-                    return new ResponseEntity(new ErrorListResponse(message), OK);
-                }
-            }
+
+            return fileUploadService.uploadImage(image);
         }
         return new ResponseEntity(null, UNAUTHORIZED);
     }

@@ -1,8 +1,12 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.response;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorMessage {
 
     private String email;
@@ -11,4 +15,5 @@ public class ErrorMessage {
     private String captcha;
     private String code;
     private String photo;
+    private String image;
 }
