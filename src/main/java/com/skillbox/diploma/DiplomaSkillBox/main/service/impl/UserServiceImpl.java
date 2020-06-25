@@ -19,11 +19,8 @@ import java.util.List;
 @Log4j2
 public class UserServiceImpl implements UserService {
 
-
-    @Autowired
+    
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
     private final UserRepository userRepository;
 
     @Autowired
