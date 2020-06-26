@@ -19,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -44,7 +46,7 @@ public class PostServiceByMode {
         this.tagToPostRepository = tagToPostRepository;
     }
 
-    public PostsResponse getSetPosts(int offset, int limit, String mode) {
+    public ResponseEntity<PostsResponse> getSetPosts(int offset, int limit, String mode) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -123,7 +125,7 @@ public class PostServiceByMode {
             }
         }
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return postsResponse;
+        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
     }
 
     public PostsResponse getAllPostByDate(int offset, int limit, Instant instant) {
@@ -142,7 +144,7 @@ public class PostServiceByMode {
         return postsResponse;
     }
 
-    public PostCommentsResponse getPostById(Long id, User currentUser) {
+    public ResponseEntity<PostCommentsResponse> getPostById(Long id, User currentUser) {
 
         Post post = postRepository.findById(id).orElse(null);
         PostCommentsResponse postCommentsResponse = null;
@@ -167,7 +169,7 @@ public class PostServiceByMode {
                     disLikeCount, commentCount, postComments, tagsName);
         }
 
-        return postCommentsResponse;
+        return new ResponseEntity<>(postCommentsResponse, HttpStatus.OK);
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {

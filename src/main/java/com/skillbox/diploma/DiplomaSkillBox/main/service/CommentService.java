@@ -6,8 +6,11 @@ import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostCommentRepositor
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.CommentRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.IdResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +29,7 @@ public class CommentService {
         this.postRepository = postRepository;
     }
 
-    public IdResponse addComment(CommentRequest commentRequest, User currentUser) {
+    public ResponseEntity<ResponseBasic> addComment(CommentRequest commentRequest, User currentUser) {
 
         Long postId = commentRequest.getPostId();
         Long parentId = commentRequest.getParentId();
@@ -34,7 +37,7 @@ public class CommentService {
 
         PostComment postComment = new PostComment();
         postComment.setPost(postRepository.findById(postId).orElse(null));
-        if (parentId != null){
+        if (parentId != null) {
             postComment.setParent(postCommentRepository.findById(parentId).orElse(null));
         }
         postComment.setUser(currentUser);
@@ -42,6 +45,15 @@ public class CommentService {
         postComment.setTime(Instant.now());
 
         PostComment savedComment = postCommentRepository.save(postComment);
-        return new IdResponse(savedComment.getId());
+        return new ResponseEntity<ResponseBasic>(ResponseBasic.builder().id(savedComment.getId()).build(), HttpStatus.OK);
+    }
+
+    public ResponseEntity<ResponseBasic> errorByComment() {
+
+        String errorMessage = "Текст комментария не задан или слишком короткий";
+
+        ErrorMessage error = ErrorMessage.builder().text(errorMessage).build();
+        ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(error).build();
+        return new ResponseEntity(responseBasic, HttpStatus.OK);
     }
 }

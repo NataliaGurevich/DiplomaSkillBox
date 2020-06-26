@@ -4,6 +4,8 @@ import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CalendarResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -21,7 +23,7 @@ public class CalendarService {
         this.postRepository = postRepository;
     }
 
-    public CalendarResponse postsPerDate(String year) {
+    public ResponseEntity<CalendarResponse> postsPerDate(String year) {
         Set<Integer> years = new TreeSet<>();
         TreeMap<String, Integer> posts = new TreeMap();
         List<Date> datesWithPosts = postRepository.findListDates(Instant.now()).orElse(null);
@@ -41,6 +43,6 @@ public class CalendarService {
 
             posts.put(day, countPostsPerDay);
         }
-        return new CalendarResponse(years, posts);
+        return new ResponseEntity<>(new CalendarResponse(years, posts), HttpStatus.OK);
     }
 }

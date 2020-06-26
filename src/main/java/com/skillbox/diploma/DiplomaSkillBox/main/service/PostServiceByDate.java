@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -35,7 +37,7 @@ public class PostServiceByDate {
         this.postVoteRepository = postVoteRepository;
     }
 
-    public PostsResponse getPostsByDate(int offset, int limit, String day) {
+    public ResponseEntity<PostsResponse> getPostsByDate(int offset, int limit, String day) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -48,7 +50,7 @@ public class PostServiceByDate {
             posts = cretePostList(postList);
         }
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return postsResponse;
+        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {

@@ -8,6 +8,8 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.StatisticResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -26,7 +28,7 @@ public class StatisticsService {
         this.postVoteRepository = postVoteRepository;
     }
 
-    public StatisticResponse myStatistics(User currentUser){
+    public ResponseEntity<StatisticResponse> myStatistics(User currentUser){
 
         StatisticResponse statisticResponse = new StatisticResponse();
 
@@ -55,10 +57,10 @@ public class StatisticsService {
         statisticResponse.setViewsCount(viewsCount);
         statisticResponse.setFirstPublication(firstPublication);
 
-        return statisticResponse;
+        return new ResponseEntity<>(statisticResponse, HttpStatus.OK);
     }
 
-    public StatisticResponse allStatistics(){
+    public ResponseEntity<StatisticResponse> allStatistics(){
 
         StatisticResponse statisticResponse = new StatisticResponse();
 
@@ -87,6 +89,6 @@ public class StatisticsService {
         statisticResponse.setViewsCount(viewsCount);
         statisticResponse.setFirstPublication(firstPublication);
 
-        return statisticResponse;
+        return new ResponseEntity<>(statisticResponse, HttpStatus.OK);
     }
 }

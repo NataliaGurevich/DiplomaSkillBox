@@ -9,12 +9,14 @@ import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostVoteRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.ModerationRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ public class PostServiceModeration {
         this.postCommentRepository = postCommentRepository;
     }
 
-    public PostsResponse getSetPosts(int offset, int limit, String status, User currentUser) {
+    public ResponseEntity<PostsResponse> getSetPosts(int offset, int limit, String status, User currentUser) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -68,7 +70,7 @@ public class PostServiceModeration {
         posts = cretePostList(postList);
 
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return postsResponse;
+        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {
@@ -95,7 +97,7 @@ public class PostServiceModeration {
         return postsResponse;
     }
 
-    public ResultResponse setModeration(ModerationRequest moderationRequest, User moderator) {
+    public ResponseEntity<ResponseBasic> setModeration(ModerationRequest moderationRequest, User moderator) {
 
         Long postId = moderationRequest.getPostId();
         String moderationStatus = moderationRequest.getDecision().equalsIgnoreCase("accept") ?
@@ -109,10 +111,12 @@ public class PostServiceModeration {
         Post postEdit = postRepository.save(post);
 
         if (postEdit != null){
-            return new ResultResponse(true);
+            ResponseBasic responseBasic = ResponseBasic.builder().result(true).build();
+            return new ResponseEntity (responseBasic, HttpStatus.OK);
         }
         else {
-            return new ResultResponse(false, "Moderation status don't edit");
+            ResponseBasic responseBasic = ResponseBasic.builder().result(false).message("Moderation status don't edit").build();
+            return new ResponseEntity (responseBasic, HttpStatus.OK);
         }
     }
 }

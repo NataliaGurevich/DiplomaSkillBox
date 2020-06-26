@@ -8,10 +8,7 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRestoreRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorListResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.TrueFalseResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtTokenProvider;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUserFactory;
 import lombok.Data;
@@ -121,37 +118,48 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity registration(Registration registrationRequest) {
+    public ResponseEntity<ResponseBasic> registration(Registration registrationRequest) {
         String email = registrationRequest.getEmail();
         String name = registrationRequest.getName();
         String password = registrationRequest.getPassword();
         String code = registrationRequest.getCaptcha();
         String captchaSecret = registrationRequest.getCaptchaSecret();
 
+        boolean result = true;
+        boolean isNameError = false;
+        boolean isEmailError = false;
+        boolean isPasswordError = false;
+        boolean isCodeError = false;
+
         if (userRepository.findByEmail(email) != null) {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setEmail(WRONG_EMAIL);
-            return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
+            isEmailError = true;
+            result = false;
         }
 
-        if (name == null || name.length() > 255) {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setName(WRONG_NAME);
-            return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
+        if (StringUtils.isEmpty(name) || name.length() > 255) {
+            isNameError = true;
+            result = false;
         }
 
         if (password.length() < 6) {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setPassword(WRONG_PASSWORD);
-            return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
+            isPasswordError = true;
+            result = false;
         }
 
         if (code == null || code.length() == 0 ||
                 !bCryptPasswordEncoder.matches(code, captchaSecret)) {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setCaptcha(WRONG_CAPTCHA);
-            return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
-
+            isCodeError = true;
+            result = false;
+        }
+        if (!result) {
+            ErrorMessage errorMessage = ErrorMessage.builder()
+                    .name(isNameError ? WRONG_NAME : null)
+                    .email(isEmailError ? WRONG_EMAIL : null)
+                    .password(isPasswordError ? WRONG_PASSWORD : null)
+                    .captcha(isCodeError ? WRONG_CAPTCHA : null)
+                    .build();
+            ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(errorMessage).build();
+            return new ResponseEntity(responseBasic, HttpStatus.OK);
         }
 
         User user = new User();
@@ -164,7 +172,8 @@ public class AuthService {
 
         log.info("IN REGISTRATION user {} is registered", user);
 
-        return new ResponseEntity(new TrueFalseResponse(true), HttpStatus.OK);
+        ResponseBasic responseBasic = ResponseBasic.builder().result(true).build();
+        return new ResponseEntity(responseBasic, HttpStatus.OK);
     }
 
     public CaptchaResponse getCaptchaResponse(String secret, String captcha) {
@@ -174,7 +183,7 @@ public class AuthService {
         return captchaResponse;
     }
 
-    public TrueFalseResponse sendMailToRestorePassword(PasswordRestoreRequest passwordRequest) {
+    public ResponseEntity<ResponseBasic> sendMailToRestorePassword(PasswordRestoreRequest passwordRequest) {
         String email = passwordRequest.getEmail();
         User user = userRepository.findByEmail(email);
         final int MAXIMUM_LENGTH = 45;
@@ -191,6 +200,7 @@ public class AuthService {
                     generatedCode.append(CHARACTERS.charAt(randonSequence));
                 }
 
+                host = host.startsWith("MAIL_HOST=") ? host.replaceFirst("MAIL_HOST=", "") : host;
                 String code = generatedCode.toString();
                 String subj = "Welcome to DevPub!";
                 String message = String.format("Hello, %s! \n" +
@@ -208,45 +218,63 @@ public class AuthService {
 
                 log.info("MAIL TO {} IS SENT {}", user.getName(), result);
 
-                return new TrueFalseResponse(result);
+                ResponseBasic responseBasic = ResponseBasic.builder().result(result).build();
+                return new ResponseEntity(responseBasic, HttpStatus.OK);
             }
-            return new TrueFalseResponse(false);
+            ResponseBasic responseBasic = ResponseBasic.builder().result(false).build();
+            return new ResponseEntity(responseBasic, HttpStatus.OK);
         } else {
-            return new TrueFalseResponse(false);
+            ResponseBasic responseBasic = ResponseBasic.builder().result(false).build();
+            return new ResponseEntity(responseBasic, HttpStatus.OK);
         }
     }
 
-    public ResponseEntity restorePassword(PasswordRequest passwordRequest) {
+    public ResponseEntity<ResponseBasic> restorePassword(PasswordRequest passwordRequest) {
 
         String password = passwordRequest.getPassword();
         String code = passwordRequest.getCode();
         String captcha = passwordRequest.getCaptcha();
         String captchaSecret = passwordRequest.getCaptchaSecret();
 
+        boolean result = true;
+        boolean isCaptchaError = false;
+        boolean isPasswordError = false;
+        boolean isCodeError = false;
+
         User currentUser = userRepository.findByCode(code);
 
         if (password.length() < 6) {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setPassword(WRONG_PASSWORD);
-            return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
+            isPasswordError = true;
+            result = false;
         }
 
         if (StringUtils.isEmpty(captcha) || !bCryptPasswordEncoder.matches(captcha, captchaSecret)) {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setCaptcha(WRONG_CAPTCHA);
-            return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
+            isCaptchaError = true;
+            result = false;
         }
 
-        if (currentUser != null) {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setCaptcha(WRONG_CODE);
-            return new ResponseEntity(new ErrorListResponse(errorMessage), HttpStatus.OK);
+        if (currentUser == null) {
+            isCodeError = true;
+            result = false;
         }
 
-        currentUser.setPassword(bCryptPasswordEncoder.encode(password));
-        userRepository.save(currentUser);
+        if (!result) {
+            ErrorMessage errorMessage = ErrorMessage.builder()
+                    .password(isPasswordError ? WRONG_PASSWORD : null)
+                    .code(isCodeError ? WRONG_CODE : null)
+                    .captcha(isCaptchaError ? WRONG_CAPTCHA : null)
+                    .build();
+            ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(errorMessage).build();
+            return new ResponseEntity(responseBasic, HttpStatus.OK);
+        }
+        else {
 
-        return new ResponseEntity(new TrueFalseResponse(true), HttpStatus.OK);
+            currentUser.setPassword(bCryptPasswordEncoder.encode(password));
+            userRepository.save(currentUser);
+
+            ResponseBasic responseBasic = ResponseBasic.builder().result(true).build();
+            return new ResponseEntity(responseBasic, HttpStatus.OK);
+        }
     }
 
     public Map<String, Instant> getCodes() {
