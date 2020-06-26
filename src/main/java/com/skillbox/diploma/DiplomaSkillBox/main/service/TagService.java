@@ -11,6 +11,8 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.TagsResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,7 +68,7 @@ public class TagService {
     }
 
 
-    public TagsResponse getAllTags(String query) {
+    public ResponseEntity<TagsResponse> getAllTags(String query) {
         TagsResponse tagsResponse = new TagsResponse();
         List<TagResponse> tagsWeights = getListTags(query);
 
@@ -75,6 +77,6 @@ public class TagService {
 
         log.info("IN TAGS {}", tagsResponse);
 
-        return tagsResponse;
+        return new ResponseEntity<>(tagsResponse, HttpStatus.OK);
     }
 }

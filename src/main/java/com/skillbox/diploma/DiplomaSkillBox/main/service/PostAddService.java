@@ -6,11 +6,14 @@ import com.skillbox.diploma.DiplomaSkillBox.main.model.TagToPost;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -52,10 +55,15 @@ public class PostAddService {
         this.globalSettingsRepository = globalSettingsRepository;
     }
 
-    public ResultResponse addNewPost(PostAddRequest postAddRequest, String token) throws ParseException {
+    public ResponseEntity<ResponseBasic> addNewPost(PostAddRequest postAddRequest, String token) throws ParseException {
 
         final String errorTitle = "Заголовок не установлен";
         final String errorText = "Текст публикации слишком короткий";
+
+        boolean isTextError = false;
+        boolean isTitleError = false;
+        boolean isUserError = false;
+        boolean result = true;
 
         Post postCreated;
         User currentUser = authService.getCurrentUser(token);
@@ -67,18 +75,40 @@ public class PostAddService {
         List<String> tagsName = postAddRequest.getTags();
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-        Date result = df.parse(time);
-        Instant instant = result.toInstant();
+        Date resultDate = df.parse(time);
+        Instant instant = resultDate.toInstant();
 
         if (text.length() < 50) {
-            return new ResultResponse(false, errorText);
+            result = false;
+            isTextError = true;
+//            return new ResultResponse(false, errorText);
 
-        } else if (title.length() < 3 || title.length() > 255) {
-            return new ResultResponse(false, errorTitle);
+        } if (title.length() < 3 || title.length() > 255) {
+            result = false;
+            isTitleError = true;
+//            return new ResultResponse(false, errorTitle);
 
-        } else if (currentUser == null) {
-            return new ResultResponse(false, "Current user = NULL");
+        } if (currentUser == null) {
+//            return new ResultResponse(false, "Current user = NULL");
+            ResponseBasic responseBasic = ResponseBasic
+                    .builder()
+                    .result(false)
+                    .build();
+            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
 
+        }
+        if (!result){
+            ErrorMessage errorMessage = ErrorMessage
+                    .builder()
+                    .text(isTextError ? errorText : null)
+                    .title(isTitleError ? errorTitle : null)
+                    .build();
+            ResponseBasic responseBasic = ResponseBasic
+                    .builder()
+                    .result(false)
+                    .errorMessage(errorMessage)
+                    .build();
+            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
         } else {
             Post post = new Post();
             post.setIsActive(isActive);
@@ -107,7 +137,11 @@ public class PostAddService {
             }
         }
 
-        return new ResultResponse(true, "");
+        ResponseBasic responseBasic = ResponseBasic
+                .builder()
+                .result(true)
+                .build();
+        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
     }
 
     public Set<Tag> addTag(List<String> tagsName) {

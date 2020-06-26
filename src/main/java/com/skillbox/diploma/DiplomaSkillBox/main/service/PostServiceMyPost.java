@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ public class PostServiceMyPost {
         this.postUtil = postUtil;
     }
 
-    public PostsResponse getMyPosts(int offset, int limit, String status, User currentUser) {
+    public ResponseEntity<PostsResponse> getMyPosts(int offset, int limit, String status, User currentUser) {
 
         final String INACTIVE_STATUS = "INACTIVE";
         final String PENDING_STATUS = "PENDING";
@@ -103,7 +105,7 @@ public class PostServiceMyPost {
         }
 //        PostsResponse postsResponse = getAllPostResponse(count, posts);
         PostsResponse postsResponse = postUtil.getAllPostResponse(count, posts);
-        return postsResponse;
+        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {

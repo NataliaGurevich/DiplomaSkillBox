@@ -6,16 +6,17 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder(toBuilder = true)
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseBasic {
 
-    private Boolean result;
-    private String text;
-    private final String message;
-    private Long id;
+    protected final Boolean result;
+    protected final String text;
+    protected final String message;
+    protected final Long id;
 
     @JsonProperty("errors")
-    private ErrorMessage errorMessage;
+    protected ErrorMessage errorMessage;
+
 
 }

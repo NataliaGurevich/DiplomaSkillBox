@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +23,7 @@ public class ProfileService {
 
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Value("${com.cloudinary.cloud_name}")
     private String cloudName;
@@ -29,15 +31,16 @@ public class ProfileService {
     @Value("${com.cloudinari.url}")
     private String cloudUri;
 
-    private final String EMAIL_ERROR = "Этот e-mail уже зарегистрирован";
+    private final String EMAIL_ERROR = "Этот e-mail уже зарегистрирован / или не введен";
     private final String PHOTO_ERROR = "Фото слишком большое, нужно не более 5Mb";
     private final String NAME_ERROR = "Имя указано неверно";
     private final String PASSWORD_ERROR = "Пароль короче 6-ти символов";
 
     @Autowired
-    public ProfileService(UserRepository userRepository, FileUploadService fileUploadService) {
+    public ProfileService(UserRepository userRepository, FileUploadService fileUploadService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.fileUploadService = fileUploadService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public ResponseEntity<ResponseBasic> changeProfile(MultipartFile photo, String name, String email, String password, int removePhoto, User currentUser) throws IOException {
@@ -48,15 +51,17 @@ public class ProfileService {
         boolean isPasswordError = false;
         boolean isPhotoError = false;
 
+        User savedUser;
+
         if (StringUtils.isEmpty(name)) {
             isNameError = true;
             result = false;
         }
-        if (!email.equals("") && (userRepository.findByEmail(email) != null && !userRepository.findByEmail(email).equals(currentUser))) {
+        if (StringUtils.isEmpty(email) || (userRepository.findByEmail(email) != null && !userRepository.findByEmail(email).equals(currentUser))) {
             isEmailError = true;
             result = false;
         }
-        if (!password.equals("") && password.length() < 6) {
+        if (!StringUtils.isEmpty(password) && password.length() < 6) {
             isPasswordError = true;
             result = false;
         }
@@ -72,7 +77,7 @@ public class ProfileService {
                     .photo(isPhotoError ? PHOTO_ERROR : null)
                     .build();
             ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(errorMessage).build();
-            return new ResponseEntity(responseBasic, HttpStatus.OK);
+            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
         } else {
 
             String avatar = fileUploadService.fileUploadAvatar(photo);
@@ -85,13 +90,17 @@ public class ProfileService {
             currentUser.setName(name);
             currentUser.setEmail(email);
 
-            if (password.length() >= 6) {
-                currentUser.setPassword(password);
+            if (!StringUtils.isEmpty(password)) {
+                currentUser.setPassword(bCryptPasswordEncoder.encode(password));
             }
-            userRepository.save(currentUser);
+
+            savedUser = userRepository.save(currentUser);
         }
-        ResponseBasic responseBasic = ResponseBasic.builder().result(true).build();
-        return new ResponseEntity(responseBasic, HttpStatus.OK);
+        ResponseBasic responseBasic = savedUser != null ?
+                ResponseBasic.builder().result(true).build()
+                :
+                ResponseBasic.builder().result(false).build();
+        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
     }
 
     public ResponseEntity<ResponseBasic> changeProfile(ProfileRequest profileRequest, User currentUser) {
@@ -105,13 +114,14 @@ public class ProfileService {
         boolean isNameError = false;
         boolean isEmailError = false;
         boolean isPasswordError = false;
-        boolean isPhotoError = false;
+
+        User savedUser;
 
         if (StringUtils.isEmpty(name)) {
             isNameError = true;
             result = false;
         }
-        if (!email.equals("") && (userRepository.findByEmail(email) != null && !userRepository.findByEmail(email).equals(currentUser))) {
+        if (StringUtils.isEmpty(email) || (userRepository.findByEmail(email) != null && !userRepository.findByEmail(email).equals(currentUser))) {
             isEmailError = true;
             result = false;
         }
@@ -127,7 +137,7 @@ public class ProfileService {
                     .password(isPasswordError ? PASSWORD_ERROR : null)
                     .build();
             ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(errorMessage).build();
-            return new ResponseEntity(responseBasic, HttpStatus.OK);
+            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
         } else {
             currentUser.setName(name);
             currentUser.setEmail(email);
@@ -137,11 +147,16 @@ public class ProfileService {
             }
 
             if (!StringUtils.isEmpty(password)) {
-                currentUser.setPassword(password);
+                currentUser.setPassword(bCryptPasswordEncoder.encode(password));
             }
-            userRepository.save(currentUser);
+
+            savedUser = userRepository.save(currentUser);
         }
-        ResponseBasic responseBasic = ResponseBasic.builder().result(true).build();
-        return new ResponseEntity(responseBasic, HttpStatus.OK);
+
+        ResponseBasic responseBasic = savedUser != null ?
+                ResponseBasic.builder().result(true).build()
+                :
+                ResponseBasic.builder().result(false).build();
+        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
     }
 }

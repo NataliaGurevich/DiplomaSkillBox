@@ -6,8 +6,10 @@ import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostVoteRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.LikeDislikeRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.TrueFalseResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +29,7 @@ public class LikeDislikeService {
         this.postRepository = postRepository;
     }
 
-    public TrueFalseResponse setLikeDislike(LikeDislikeRequest likeDislikeRequest, Boolean value, User currentUser) {
+    public ResponseEntity<ResponseBasic> setLikeDislike(LikeDislikeRequest likeDislikeRequest, Boolean value, User currentUser) {
 
         Long postId = likeDislikeRequest.getPostId();
         Post post = postRepository.findById(postId).orElse(null);
@@ -41,12 +43,20 @@ public class LikeDislikeService {
         if (postOwner != currentUser) {
             PostVote postLikeDislike;
             if (postVote.isEmpty()) {
-                return new TrueFalseResponse(setNewValue(post, currentUser, value));
+                ResponseBasic responseBasic = ResponseBasic
+                        .builder()
+                        .result(setNewValue(post, currentUser, value))
+                        .build();
+                return new ResponseEntity<>(responseBasic, HttpStatus.OK);
             } else {
                 postLikeDislike = postVote.get();
                 valueBefore = postLikeDislike.getValue();
                 if (valueBefore == value) {
-                    return new TrueFalseResponse(false);
+                    ResponseBasic responseBasic = ResponseBasic
+                            .builder()
+                            .result(false)
+                            .build();
+                    return new ResponseEntity<>(responseBasic, HttpStatus.OK);
                 }
                 else {
                     postLikeDislike.setTime(Instant.now());
@@ -54,14 +64,26 @@ public class LikeDislikeService {
                     postVoteWithLike = postVoteRepository.save(postLikeDislike);
 
                     if (postVoteWithLike != null) {
-                        return new TrueFalseResponse(true);
+                        ResponseBasic responseBasic = ResponseBasic
+                                .builder()
+                                .result(true)
+                                .build();
+                        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
                     } else {
-                        return new TrueFalseResponse(false);
+                        ResponseBasic responseBasic = ResponseBasic
+                                .builder()
+                                .result(false)
+                                .build();
+                        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
                     }
                 }
             }
         } else {
-            return new TrueFalseResponse(false);
+            ResponseBasic responseBasic = ResponseBasic
+                    .builder()
+                    .result(false)
+                    .build();
+            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
         }
     }
 

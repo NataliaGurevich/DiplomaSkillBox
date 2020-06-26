@@ -4,13 +4,12 @@ import com.skillbox.diploma.DiplomaSkillBox.main.mapper.PostMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.*;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PostAddRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.PostCommentsResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ResultResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
@@ -70,7 +69,7 @@ public class PostServiceById {
         return postCommentsResponse;
     }
 
-    public ResultResponse editPostById(Long id, PostAddRequest postAddRequest, User currentUser) throws ParseException {
+    public ResponseEntity<ResponseBasic> editPostById(Long id, PostAddRequest postAddRequest, User currentUser) throws ParseException {
 
         Post post = postRepository.findById(id).orElse(null);
 
@@ -86,6 +85,10 @@ public class PostServiceById {
         final String errorTitle = "Заголовок не установлен";
         final String errorText = "Текст публикации слишком короткий";
 
+        boolean isTextError = false;
+        boolean isTitleError = false;
+        boolean result = true;
+
         if (post != null) {
             Post postCreated;
 
@@ -96,16 +99,34 @@ public class PostServiceById {
             List<String> tagsName = postAddRequest.getTags();
 
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-            Date result = df.parse(time);
-            Instant instant = result.toInstant();
+            Date resultDate = df.parse(time);
+            Instant instant = resultDate.toInstant();
 
             if (text.length() < 50) {
-                return new ResultResponse(false, errorText);
+                result = false;
+                isTextError = true;
+//                return new ResultResponse(false, errorText);
 
-            } else if (title.length() < 3 || title.length() > 255) {
-                return new ResultResponse(false, errorTitle);
+            } if (title.length() < 3 || title.length() > 255) {
+                result = false;
+                isTitleError = true;
+//                return new ResultResponse(false, errorTitle);
 
-            } else {
+            }
+            if (!result) {
+                ErrorMessage errorMessage = ErrorMessage
+                        .builder()
+                        .text(isTextError ? errorText : null)
+                        .title(isTitleError ? errorTitle : null)
+                        .build();
+                ResponseBasic responseBasic = ResponseBasic
+                        .builder()
+                        .result(false)
+                        .errorMessage(errorMessage)
+                        .build();
+                return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+            }
+            else {
                 post.setIsActive(isActive);
                 post.setTitle(title);
                 post.setText(text);
@@ -129,11 +150,20 @@ public class PostServiceById {
                         tagToPostRepository.save(tagToPostEdit);
                     }
                 }
-                return new ResultResponse(true, "");
+                ResponseBasic responseBasic = ResponseBasic
+                        .builder()
+                        .result(true)
+                        .build();
+                return new ResponseEntity<>(responseBasic, HttpStatus.OK);
             }
         }
         else {
-            return new ResultResponse(false, "Post = null");
+            ResponseBasic responseBasic = ResponseBasic
+                    .builder()
+                    .result(false)
+                    .message("Post = null")
+                    .build();
+            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
         }
     }
 

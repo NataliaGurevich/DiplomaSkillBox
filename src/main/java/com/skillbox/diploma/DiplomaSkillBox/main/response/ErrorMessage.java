@@ -16,4 +16,7 @@ public class ErrorMessage {
     private String code;
     private String photo;
     private String image;
+    private String text;
+    private String title;
+    private String message;
 }

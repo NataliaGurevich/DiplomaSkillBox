@@ -3,21 +3,19 @@ package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.GlobalSettingsRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.ProfileRequest;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorListResponse;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.CalendarResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.GlobalSettingsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.InitializeResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -62,13 +60,13 @@ public class DefaultController {
     }
 
     @RequestMapping(value = "/api/settings", method = RequestMethod.GET)
-    public ResponseEntity settingsGet() {
-        return new ResponseEntity(globalSettingsService.globalSettingsResponse(), OK);
+    public ResponseEntity<GlobalSettingsResponse> settingsGet() {
+        return globalSettingsService.globalSettingsResponse();
     }
 
     @RequestMapping(value = "/api/settings", method = RequestMethod.PUT)
-    public ResponseEntity settingsPut(@RequestBody GlobalSettingsRequest globalSettingsRequest,
-                                      @CookieValue(value = "Token", defaultValue = "") String token) {
+    public ResponseEntity<GlobalSettingsResponse> settingsPut(@RequestBody GlobalSettingsRequest globalSettingsRequest,
+                                                              @CookieValue(value = "Token", defaultValue = "") String token) {
 
         User currentUser = authService.getCurrentUser(token);
 
@@ -83,14 +81,14 @@ public class DefaultController {
 
             globalSettingsService.saveGlobalSettings(globalSettingsRequest);
 
-            return new ResponseEntity(globalSettingsResponse, OK);
+            return new ResponseEntity<>(globalSettingsResponse, OK);
         }
 
-        return new ResponseEntity(globalSettingsService.globalSettingsResponse(), OK);
+        return globalSettingsService.globalSettingsResponse();
     }
 
     @RequestMapping(value = "/api/calendar{year}", method = RequestMethod.GET)
-    public ResponseEntity calendar(@PathVariable String year) {
+    public ResponseEntity<CalendarResponse> calendar(@PathVariable String year) {
         try {
             year = (year == null || Integer.parseInt(year) > Integer.parseInt(currentYear) || year.length() < 4) ?
                     currentYear : year;
@@ -98,15 +96,7 @@ public class DefaultController {
             year = currentYear;
         }
 
-        return new ResponseEntity(calendarService.postsPerDate(year), OK);
-    }
-
-    @RequestMapping(value = "/posts/recent", method = RequestMethod.GET)
-    public ResponseEntity defaultPage(@RequestParam(value = "offset", defaultValue = "0") int offset,
-                                      @RequestParam(value = "limit", defaultValue = "10") int limit,
-                                      @RequestParam(value = "mode", defaultValue = "recent") String mode) {
-
-        return new ResponseEntity(postServiceByMode.getSetPosts(offset, limit, mode), HttpStatus.OK);
+        return calendarService.postsPerDate(year);
     }
 
     @RequestMapping(value = "/login/change-password/{code}", method = RequestMethod.GET)
@@ -118,7 +108,7 @@ public class DefaultController {
     //    @PostMapping(value = "/api/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PostMapping(value = "/api/image")
     public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile image,
-                                      @CookieValue(value = "Token", defaultValue = "") String token) throws IOException {
+                                         @CookieValue(value = "Token", defaultValue = "") String token) throws IOException {
 
         User currentUser = authService.getCurrentUser(token);
 
@@ -126,16 +116,16 @@ public class DefaultController {
 
             return fileUploadService.uploadImage(image);
         }
-        return new ResponseEntity(null, UNAUTHORIZED);
+        return new ResponseEntity<>(null, UNAUTHORIZED);
     }
 
     @PostMapping(value = "/api/profile/my", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity profile(@RequestParam("photo") MultipartFile photo,
-                                  @RequestParam String name,
-                                  @RequestParam String email,
-                                  @RequestParam(required = false, defaultValue = "") String password,
-                                  @RequestParam(required = false, defaultValue = "0") int removePhoto,
-                                  @CookieValue(value = "Token", defaultValue = "") String token) throws IOException, ServletException {
+    public ResponseEntity<ResponseBasic> profile(@RequestParam("photo") MultipartFile photo,
+                                                 @RequestParam String name,
+                                                 @RequestParam String email,
+                                                 @RequestParam(required = false, defaultValue = "") String password,
+                                                 @RequestParam(required = false, defaultValue = "0") int removePhoto,
+                                                 @CookieValue(value = "Token", defaultValue = "") String token) throws IOException {
 
         User currentUser = authService.getCurrentUser(token);
 
@@ -147,12 +137,12 @@ public class DefaultController {
         if (currentUser != null) {
             return (profileService.changeProfile(photo, name, email, password, removePhoto, currentUser));
         }
-        return new ResponseEntity(null, UNAUTHORIZED);
+        return new ResponseEntity<>(null, UNAUTHORIZED);
     }
 
     @PostMapping(value = "/api/profile/my")
-    public ResponseEntity profile(@RequestBody ProfileRequest profileRequest,
-                                  @CookieValue(value = "Token", defaultValue = "") String token) throws IOException, ServletException {
+    public ResponseEntity<ResponseBasic> profile(@RequestBody ProfileRequest profileRequest,
+                                                 @CookieValue(value = "Token", defaultValue = "") String token) {
 
         User currentUser = authService.getCurrentUser(token);
 
@@ -164,7 +154,7 @@ public class DefaultController {
         if (currentUser != null) {
             return (profileService.changeProfile(profileRequest, currentUser));
         }
-        return new ResponseEntity(null, UNAUTHORIZED);
+        return new ResponseEntity<>(null, UNAUTHORIZED);
     }
 
     @RequestMapping(method = {RequestMethod.OPTIONS, RequestMethod.GET}, value = "/**/{path:[^\\.]*}")

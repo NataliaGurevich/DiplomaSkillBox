@@ -172,7 +172,8 @@ public class AuthService {
 
         log.info("IN REGISTRATION user {} is registered", user);
 
-        return new ResponseEntity(new TrueFalseResponse(true), HttpStatus.OK);
+        ResponseBasic responseBasic = ResponseBasic.builder().result(true).build();
+        return new ResponseEntity(responseBasic, HttpStatus.OK);
     }
 
     public CaptchaResponse getCaptchaResponse(String secret, String captcha) {
