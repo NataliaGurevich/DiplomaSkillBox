@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.skillbox.diploma.</groupId>
 	<artifactId>DiplomaSkillBox</artifactId>
-	<version>1.6</version>
+	<version>1.7</version>
 	<name>DiplomaSkillBox</name>
 	<description>Diploma Project from SkillBox</description>
 
