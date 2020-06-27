@@ -13,19 +13,14 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.PostCommentsResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,16 +32,18 @@ public class PostServiceByMode {
     private final PostCommentRepository postCommentRepository;
     private final PostVoteRepository postVoteRepository;
     private final TagToPostRepository tagToPostRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceByMode(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository) {
+    public PostServiceByMode(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
         this.tagToPostRepository = tagToPostRepository;
+        this.postMapper = postMapper;
     }
 
-    public ResponseEntity<PostsResponse> getSetPosts(int offset, int limit, String mode) {
+    public PostsResponse getSetPosts(int offset, int limit, String mode) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -103,10 +100,10 @@ public class PostServiceByMode {
                 count = postList.size();
 
                 postList = postList.stream().peek(p -> {
-                            Integer countLike = postVoteRepository.findCountLikes(p.getId()).orElse(0);
-                            p.setLikeCount(countLike);
+                    Integer countLike = postVoteRepository.findCountLikes(p.getId()).orElse(0);
+                    p.setLikeCount(countLike);
                     log.info("BEST COUNT LIKES postId {} - countLikes {}", p.getId(), p.getLikeCount());
-                        }).sorted((p1, p2) -> p2.getLikeCount().compareTo(p1.getLikeCount())).collect(Collectors.toList());
+                }).sorted((p1, p2) -> p2.getLikeCount().compareTo(p1.getLikeCount())).collect(Collectors.toList());
 
                 int endList = Math.min((offset + limit), (int) count);
                 postList = postList.subList(offset, endList);
@@ -125,7 +122,7 @@ public class PostServiceByMode {
             }
         }
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     public PostsResponse getAllPostByDate(int offset, int limit, Instant instant) {
@@ -144,7 +141,7 @@ public class PostServiceByMode {
         return postsResponse;
     }
 
-    public ResponseEntity<PostCommentsResponse> getPostById(Long id, User currentUser) {
+    public PostCommentsResponse getPostById(Long id, User currentUser) {
 
         Post post = postRepository.findById(id).orElse(null);
         PostCommentsResponse postCommentsResponse = null;
@@ -165,11 +162,11 @@ public class PostServiceByMode {
             List<Tag> tags = tagToPostRepository.findByPost(post);
             List<String> tagsName = tags.stream().map(t -> t.getName()).collect(Collectors.toList());
 
-            postCommentsResponse = PostMapper.converterPostWithComment(post, likeCount,
+            postCommentsResponse = postMapper.converterPostWithComment(post, likeCount,
                     disLikeCount, commentCount, postComments, tagsName);
         }
 
-        return new ResponseEntity<>(postCommentsResponse, HttpStatus.OK);
+        return postCommentsResponse;
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {
@@ -179,7 +176,7 @@ public class PostServiceByMode {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
 
         return posts;

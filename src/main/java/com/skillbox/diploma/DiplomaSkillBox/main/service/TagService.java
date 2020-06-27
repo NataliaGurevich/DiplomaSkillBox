@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -29,12 +30,14 @@ public class TagService {
     private final TagRepository tagRepository;
     private final PostRepository postRepository;
     private final TagToPostRepository tagToPostRepository;
+    private final TagMapper tagMapper;
 
     @Autowired
-    public TagService(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository) {
+    public TagService(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository, TagMapper tagMapper) {
         this.tagRepository = tagRepository;
         this.postRepository = postRepository;
         this.tagToPostRepository = tagToPostRepository;
+        this.tagMapper = tagMapper;
     }
 
     private List<TagResponse> getListTags(String query) {
@@ -61,7 +64,7 @@ public class TagService {
 
                 log.info("TAG {}, TotalPosts {}, PostsProTag {}, weight {}", tag.getName(), countPosts, countPostsProTags, weight);
 
-                tagsWeights.add(TagMapper.converter(tag, weight));
+                tagsWeights.add(tagMapper.converter(tag, weight));
             }
         }
         return tagsWeights;
@@ -69,6 +72,9 @@ public class TagService {
 
 
     public ResponseEntity<TagsResponse> getAllTags(String query) {
+
+        query = StringUtils.isEmpty(query) ? "" : query.trim();
+
         TagsResponse tagsResponse = new TagsResponse();
         List<TagResponse> tagsWeights = getListTags(query);
 

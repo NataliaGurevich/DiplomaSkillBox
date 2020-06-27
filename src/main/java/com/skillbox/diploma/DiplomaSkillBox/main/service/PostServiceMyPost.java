@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,16 +28,18 @@ public class PostServiceMyPost {
     private final PostCommentRepository postCommentRepository;
     private final PostVoteRepository postVoteRepository;
     private final PostUtil postUtil;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceMyPost(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, PostUtil postUtil) {
+    public PostServiceMyPost(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, PostUtil postUtil, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
         this.postUtil = postUtil;
+        this.postMapper = postMapper;
     }
 
-    public ResponseEntity<PostsResponse> getMyPosts(int offset, int limit, String status, User currentUser) {
+    public PostsResponse getMyPosts(int offset, int limit, String status, User currentUser) {
 
         final String INACTIVE_STATUS = "INACTIVE";
         final String PENDING_STATUS = "PENDING";
@@ -62,7 +62,6 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
         } else if (status.equalsIgnoreCase(PENDING_STATUS)) {
@@ -74,7 +73,6 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
         } else if (status.equalsIgnoreCase(DECLINED_STATUS)) {
@@ -86,7 +84,6 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
 
@@ -99,13 +96,11 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
         }
-//        PostsResponse postsResponse = getAllPostResponse(count, posts);
         PostsResponse postsResponse = postUtil.getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {
@@ -115,7 +110,7 @@ public class PostServiceMyPost {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
         return posts;
     }

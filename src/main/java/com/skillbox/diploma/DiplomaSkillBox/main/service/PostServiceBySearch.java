@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -38,17 +36,19 @@ public class PostServiceBySearch {
     private final PostVoteRepository postVoteRepository;
     private final TagToPostRepository tagToPostRepository;
     private final EntityManager entityManager;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceBySearch(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, EntityManager entityManager) {
+    public PostServiceBySearch(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, EntityManager entityManager, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
         this.tagToPostRepository = tagToPostRepository;
         this.entityManager = entityManager;
+        this.postMapper = postMapper;
     }
 
-    public ResponseEntity<PostsResponse> getPostsBySearch(int offset, int limit, String querySearch) throws InterruptedException {
+    public PostsResponse getPostsBySearch(int offset, int limit, String querySearch) throws InterruptedException {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -115,7 +115,7 @@ public class PostServiceBySearch {
             }
         }
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {
@@ -125,7 +125,7 @@ public class PostServiceBySearch {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
 
         return posts;

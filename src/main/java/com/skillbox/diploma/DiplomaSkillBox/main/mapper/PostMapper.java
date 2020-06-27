@@ -9,6 +9,8 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import lombok.Data;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
@@ -19,12 +21,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Component
 public class PostMapper {
 
-    private PostMapper() {
+    private final CommentMapper commentMapper;
+    private final UserMapper userMapper;
+
+    @Autowired
+    public PostMapper(CommentMapper commentMapper, UserMapper userMapper) {
+        this.commentMapper = commentMapper;
+        this.userMapper = userMapper;
     }
 
-    public static PostResponse converter(Post post, int likeCount, int dislikeCount, int commentCount) {
+    public PostResponse converter(Post post, int likeCount, int dislikeCount, int commentCount) {
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
                         .withZone(ZoneId.systemDefault());
@@ -35,7 +44,7 @@ public class PostMapper {
         PostResponse postResponse = new PostResponse();
         postResponse.setId(post.getId());
         postResponse.setTime(output);
-        postResponse.setUser(UserMapper.converterToShortName(post.getUser()));
+        postResponse.setUser(userMapper.converterToShortName(post.getUser()));
         postResponse.setViewCount(post.getViewCount());
         postResponse.setTitle(post.getTitle());
 
@@ -50,7 +59,7 @@ public class PostMapper {
         return postResponse;
     }
 
-    public static PostCommentsResponse converterPostWithComment(Post post, int likeCount, int dislikeCount, int commentCount,
+    public PostCommentsResponse converterPostWithComment(Post post, int likeCount, int dislikeCount, int commentCount,
                                                                 List<PostComment> comments, List<String> tags) {
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
@@ -62,7 +71,7 @@ public class PostMapper {
         PostCommentsResponse postCommentsResponse = new PostCommentsResponse();
         postCommentsResponse.setId(post.getId());
         postCommentsResponse.setTime(output);
-        postCommentsResponse.setUser(UserMapper.converterToShortName(post.getUser()));
+        postCommentsResponse.setUser(userMapper.converterToShortName(post.getUser()));
         postCommentsResponse.setViewCount(post.getViewCount());
         postCommentsResponse.setTitle(post.getTitle());
 
@@ -78,7 +87,7 @@ public class PostMapper {
         List<CommentResponse> commentResponses = new ArrayList<>();
         if (comments != null && comments.size() > 0) {
             for (PostComment comment : comments) {
-                CommentResponse commentResponse = CommentMapper.converter(comment);
+                CommentResponse commentResponse = commentMapper.converter(comment);
                 commentResponses.add(commentResponse);
             }
         }
@@ -89,7 +98,7 @@ public class PostMapper {
         return postCommentsResponse;
     }
 
-    public static PostByTagResponse converterPostByTag(Post post, int likeCount, int dislikeCount, int commentCount,
+    public PostByTagResponse converterPostByTag(Post post, int likeCount, int dislikeCount, int commentCount,
                                                        List<PostComment> comments) {
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
@@ -101,7 +110,7 @@ public class PostMapper {
         PostByTagResponse postByTagResponse = new PostByTagResponse();
         postByTagResponse.setId(post.getId());
         postByTagResponse.setTime(output);
-        postByTagResponse.setUser(UserMapper.converterToShortName(post.getUser()));
+        postByTagResponse.setUser(userMapper.converterToShortName(post.getUser()));
         postByTagResponse.setViewCount(post.getViewCount());
         postByTagResponse.setTitle(post.getTitle());
 
@@ -116,7 +125,7 @@ public class PostMapper {
         List<CommentResponse> commentResponses = new ArrayList<>();
         if (comments != null && comments.size() > 0) {
             for (PostComment comment : comments) {
-                CommentResponse commentResponse = CommentMapper.converter(comment);
+                CommentResponse commentResponse = commentMapper.converter(comment);
                 commentResponses.add(commentResponse);
             }
         }

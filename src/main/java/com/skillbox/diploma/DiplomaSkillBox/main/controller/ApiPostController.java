@@ -54,7 +54,7 @@ public class ApiPostController {
                                                     @RequestParam(value = "limit", defaultValue = "10") int limit,
                                                     @RequestParam(value = "mode", defaultValue = "recent") String mode) {
 
-        return postServiceByMode.getSetPosts(offset, limit, mode);
+        return new ResponseEntity<>(postServiceByMode.getSetPosts(offset, limit, mode), HttpStatus.OK);
     }
 
     @GetMapping("/byDate")
@@ -62,14 +62,14 @@ public class ApiPostController {
                                                           @RequestParam(value = "limit", defaultValue = "10") int limit,
                                                           @RequestParam(value = "date") String date) throws ParseException {
 
-        return postServiceByDate.getPostsByDate(offset, limit, date + "%");
+        return new ResponseEntity<>(postServiceByDate.getPostsByDate(offset, limit, date + "%"), HttpStatus.OK);
     }
 
     @GetMapping("{id}")
     public ResponseEntity<PostCommentsResponse> getPostById(@PathVariable Long id,
                                                             @CookieValue(value = "Token", defaultValue = "") String token) throws ParseException {
         User currentUser = authService.getCurrentUser(token);
-        return postServiceByMode.getPostById(id, currentUser);
+        return new ResponseEntity<>(postServiceByMode.getPostById(id, currentUser), HttpStatus.OK);
     }
 
     @PutMapping("{id}")
@@ -81,7 +81,7 @@ public class ApiPostController {
 
         if (currentUser != null && post != null && (post.getUser().equals(currentUser) || currentUser.getIsModerator())) {
             log.info("IN EDIT POST currentUser {}", currentUser.getName());
-            return postServiceById.editPostById(id, postAddRequest, currentUser);
+            return new ResponseEntity<>(postServiceById.editPostById(id, postAddRequest, currentUser), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
@@ -91,7 +91,7 @@ public class ApiPostController {
     public ResponseEntity<ResponseBasic> addPost(@RequestBody PostAddRequest postAddRequest,
                                                  @CookieValue(value = "Token", defaultValue = "") String token) throws ParseException {
 
-        return postService.addNewPost(postAddRequest, token);
+        return new ResponseEntity<>(postService.addNewPost(postAddRequest, token), HttpStatus.OK);
     }
 
     @GetMapping("/byTag")
@@ -99,7 +99,7 @@ public class ApiPostController {
                                                       @RequestParam(value = "limit", defaultValue = "10") int limit,
                                                       @RequestParam(value = "tag") String tag) {
 
-        return postServiceByTag.getSetPosts(offset, limit, tag);
+        return new ResponseEntity<>(postServiceByTag.getSetPosts(offset, limit, tag), HttpStatus.OK);
     }
 
     @GetMapping("/moderation")
@@ -110,7 +110,7 @@ public class ApiPostController {
         User currentUser = authService.getCurrentUser(token);
         if (currentUser.getIsModerator()) {
             log.info("MODERATION {}", currentUser);
-            return postServiceModeration.getSetPosts(offset, limit, status.toUpperCase(), currentUser);
+            return new ResponseEntity<>(postServiceModeration.getSetPosts(offset, limit, status.toUpperCase(), currentUser), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
@@ -121,7 +121,7 @@ public class ApiPostController {
                                                          @RequestParam(value = "limit", defaultValue = "10") int limit,
                                                          @RequestParam(value = "query", defaultValue = "", required = false) String querySearch) throws InterruptedException {
 
-        return postServiceBySearch.getPostsBySearch(offset, limit, querySearch.trim());
+        return new ResponseEntity<>(postServiceBySearch.getPostsBySearch(offset, limit, querySearch.trim()), HttpStatus.OK);
     }
 
     @GetMapping("/my")
@@ -133,7 +133,7 @@ public class ApiPostController {
 
         if (currentUser != null) {
             log.info("IN MY currentUser {}", currentUser.getName());
-            return postServiceMyPost.getMyPosts(offset, limit, status, currentUser);
+            return new ResponseEntity<>(postServiceMyPost.getMyPosts(offset, limit, status, currentUser), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
@@ -145,7 +145,7 @@ public class ApiPostController {
         User currentUser = authService.getCurrentUser(token);
 
         if (currentUser != null) {
-            return likeDislikeService.setLikeDislike(likeDislikeRequest, true, currentUser);
+            return new ResponseEntity<>(likeDislikeService.setLikeDislike(likeDislikeRequest, true, currentUser), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
@@ -157,7 +157,7 @@ public class ApiPostController {
         User currentUser = authService.getCurrentUser(token);
 
         if (currentUser != null) {
-            return likeDislikeService.setLikeDislike(likeDislikeRequest, false, currentUser);
+            return new ResponseEntity<>(likeDislikeService.setLikeDislike(likeDislikeRequest, false, currentUser), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }

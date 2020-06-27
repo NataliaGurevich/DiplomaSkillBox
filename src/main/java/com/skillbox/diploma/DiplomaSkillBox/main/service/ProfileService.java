@@ -8,8 +8,6 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -43,7 +41,7 @@ public class ProfileService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public ResponseEntity<ResponseBasic> changeProfile(MultipartFile photo, String name, String email, String password, int removePhoto, User currentUser) throws IOException {
+    public ResponseBasic changeProfile(MultipartFile photo, String name, String email, String password, int removePhoto, User currentUser) throws IOException {
 
         boolean result = true;
         boolean isNameError = false;
@@ -77,7 +75,7 @@ public class ProfileService {
                     .photo(isPhotoError ? PHOTO_ERROR : null)
                     .build();
             ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(errorMessage).build();
-            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+            return responseBasic;
         } else {
 
             String avatar = fileUploadService.fileUploadAvatar(photo);
@@ -100,10 +98,10 @@ public class ProfileService {
                 ResponseBasic.builder().result(true).build()
                 :
                 ResponseBasic.builder().result(false).build();
-        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+        return responseBasic;
     }
 
-    public ResponseEntity<ResponseBasic> changeProfile(ProfileRequest profileRequest, User currentUser) {
+    public ResponseBasic changeProfile(ProfileRequest profileRequest, User currentUser) {
 
         String name = profileRequest.getName();
         String email = profileRequest.getEmail();
@@ -137,7 +135,7 @@ public class ProfileService {
                     .password(isPasswordError ? PASSWORD_ERROR : null)
                     .build();
             ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(errorMessage).build();
-            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+            return responseBasic;
         } else {
             currentUser.setName(name);
             currentUser.setEmail(email);
@@ -157,6 +155,6 @@ public class ProfileService {
                 ResponseBasic.builder().result(true).build()
                 :
                 ResponseBasic.builder().result(false).build();
-        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+        return responseBasic;
     }
 }

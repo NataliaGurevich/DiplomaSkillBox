@@ -29,7 +29,7 @@ public class GlobalSettingsService {
         this.globalSettingsRepository = globalSettingsRepository;
     }
 
-    public ResponseEntity<GlobalSettingsResponse> globalSettingsResponse() {
+    public GlobalSettingsResponse setGlobalSettings() {
 
         boolean MULTIUSER_MODE = false;
         boolean POST_PREMODERATION = true;
@@ -61,10 +61,15 @@ public class GlobalSettingsService {
 
         log.info("IN GLOBALSETTINGS {}", globalSettingsResponse);
 
-        return new ResponseEntity<>(globalSettingsResponse, HttpStatus.OK);
+        return globalSettingsResponse;
     }
 
     public void saveGlobalSettings(GlobalSettingsRequest globalSettingsRequest) {
+
+        GlobalSettingsResponse globalSettingsResponse = new GlobalSettingsResponse();
+        globalSettingsResponse.setMULTIUSER_MODE(globalSettingsRequest.isMULTIUSER_MODE());
+        globalSettingsResponse.setPOST_PREMODERATION(globalSettingsRequest.isPOST_PREMODERATION());
+        globalSettingsResponse.setSTATISTICS_IS_PUBLIC(globalSettingsRequest.isSTATISTICS_IS_PUBLIC());
 
         List<GlobalSettings> globalSettings = globalSettingsRepository.findAll();
 
@@ -87,5 +92,17 @@ public class GlobalSettingsService {
                 }
             }
         }
+    }
+
+    public GlobalSettingsResponse setGlobalSettings(GlobalSettingsRequest globalSettingsRequest) {
+
+        GlobalSettingsResponse globalSettingsResponse = new GlobalSettingsResponse();
+        globalSettingsResponse.setMULTIUSER_MODE(globalSettingsRequest.isMULTIUSER_MODE());
+        globalSettingsResponse.setPOST_PREMODERATION(globalSettingsRequest.isPOST_PREMODERATION());
+        globalSettingsResponse.setSTATISTICS_IS_PUBLIC(globalSettingsRequest.isSTATISTICS_IS_PUBLIC());
+
+        saveGlobalSettings(globalSettingsRequest);
+
+        return globalSettingsResponse;
     }
 }

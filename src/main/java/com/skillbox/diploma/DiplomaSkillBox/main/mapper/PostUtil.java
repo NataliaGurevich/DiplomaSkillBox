@@ -16,11 +16,13 @@ public class PostUtil {
 
     private final PostVoteRepository postVoteRepository;
     private final PostCommentRepository postCommentRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostUtil(PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository) {
+    public PostUtil(PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository, PostMapper postMapper) {
         this.postVoteRepository = postVoteRepository;
         this.postCommentRepository = postCommentRepository;
+        this.postMapper = postMapper;
     }
 
     public List<PostResponse> cretePostList(List<Post> postList) {
@@ -30,7 +32,7 @@ public class PostUtil {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
         return posts;
     }

@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -30,17 +28,19 @@ public class PostServiceByTag {
     private final TagToPostRepository tagToPostRepository;
     private final PostVoteRepository postVoteRepository;
     private final PostCommentRepository postCommentRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceByTag(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository) {
+    public PostServiceByTag(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository, PostMapper postMapper) {
         this.tagRepository = tagRepository;
         this.postRepository = postRepository;
         this.tagToPostRepository = tagToPostRepository;
         this.postVoteRepository = postVoteRepository;
         this.postCommentRepository = postCommentRepository;
+        this.postMapper = postMapper;
     }
 
-    public ResponseEntity<PostsResponse> getSetPosts(int offset, int limit, String tagName) {
+    public PostsResponse getSetPosts(int offset, int limit, String tagName) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -79,7 +79,7 @@ public class PostServiceByTag {
             }
         }
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     private List<PostByTagResponse> cretePostList(List<Post> postList) {
@@ -91,7 +91,7 @@ public class PostServiceByTag {
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
             List<PostComment> postComments = postCommentRepository.findAllByPost(post);
 
-            posts.add(PostMapper.converterPostByTag(post, likeCount, disLikeCount, commentCount, postComments));
+            posts.add(postMapper.converterPostByTag(post, likeCount, disLikeCount, commentCount, postComments));
         }
         return posts;
     }

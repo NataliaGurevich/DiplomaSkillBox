@@ -5,7 +5,6 @@ import com.skillbox.diploma.DiplomaSkillBox.main.model.Post;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostCommentRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostVoteRepository;
-import com.skillbox.diploma.DiplomaSkillBox.main.repository.TagToPostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.PostsResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,15 +26,17 @@ public class PostServiceByDate {
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
     private final PostVoteRepository postVoteRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceByDate(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository) {
+    public PostServiceByDate(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
+        this.postMapper = postMapper;
     }
 
-    public ResponseEntity<PostsResponse> getPostsByDate(int offset, int limit, String day) {
+    public PostsResponse getPostsByDate(int offset, int limit, String day) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -50,7 +49,7 @@ public class PostServiceByDate {
             posts = cretePostList(postList);
         }
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {
@@ -60,7 +59,7 @@ public class PostServiceByDate {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
 
         return posts;
