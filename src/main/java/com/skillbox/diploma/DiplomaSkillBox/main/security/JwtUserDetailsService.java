@@ -1,6 +1,7 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.security;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUser;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUserFactory;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.UserService;
@@ -15,16 +16,16 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public JwtUserDetailsService(UserService userService) {
-        this.userService = userService;
+    public JwtUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.findByUserEmail(email);
+        User user = userRepository.findByEmail(email);
 
         if (user == null) {
             throw new UsernameNotFoundException("User with email: " + email + " not found");
