@@ -26,12 +26,14 @@ public class PostServiceByDate {
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
     private final PostVoteRepository postVoteRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceByDate(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository) {
+    public PostServiceByDate(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
+        this.postMapper = postMapper;
     }
 
     public PostsResponse getPostsByDate(int offset, int limit, String day) {
@@ -57,7 +59,7 @@ public class PostServiceByDate {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
 
         return posts;

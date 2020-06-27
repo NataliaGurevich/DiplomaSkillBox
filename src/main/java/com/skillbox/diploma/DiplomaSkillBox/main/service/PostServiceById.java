@@ -27,18 +27,20 @@ public class PostServiceById {
     private final PostVoteRepository postVoteRepository;
     private final TagToPostRepository tagToPostRepository;
     private final GlobalSettingsRepository globalSettingsRepository;
+    private final PostMapper postMapper;
 
     @Value("${global.settings.premoderation}")
     private String premoderation;
 
     @Autowired
-    public PostServiceById(PostRepository postRepository, TagRepository tagRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, GlobalSettingsRepository globalSettingsRepository) {
+    public PostServiceById(PostRepository postRepository, TagRepository tagRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, GlobalSettingsRepository globalSettingsRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
         this.tagToPostRepository = tagToPostRepository;
         this.globalSettingsRepository = globalSettingsRepository;
+        this.postMapper = postMapper;
     }
 
     public PostCommentsResponse getPostById(Long id) {
@@ -60,7 +62,7 @@ public class PostServiceById {
             List<Tag> tags = tagToPostRepository.findByPost(post);
             List<String> tagsName = tags.stream().map(t -> t.getName()).collect(Collectors.toList());
 
-            postCommentsResponse = PostMapper.converterPostWithComment(post, likeCount,
+            postCommentsResponse = postMapper.converterPostWithComment(post, likeCount,
                     disLikeCount, commentCount, postComments, tagsName);
         }
 
@@ -186,7 +188,7 @@ public class PostServiceById {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
         return posts;
     }

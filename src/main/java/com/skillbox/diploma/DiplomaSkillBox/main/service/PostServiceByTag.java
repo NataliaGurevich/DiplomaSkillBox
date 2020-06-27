@@ -28,14 +28,16 @@ public class PostServiceByTag {
     private final TagToPostRepository tagToPostRepository;
     private final PostVoteRepository postVoteRepository;
     private final PostCommentRepository postCommentRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceByTag(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository) {
+    public PostServiceByTag(TagRepository tagRepository, PostRepository postRepository, TagToPostRepository tagToPostRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository, PostMapper postMapper) {
         this.tagRepository = tagRepository;
         this.postRepository = postRepository;
         this.tagToPostRepository = tagToPostRepository;
         this.postVoteRepository = postVoteRepository;
         this.postCommentRepository = postCommentRepository;
+        this.postMapper = postMapper;
     }
 
     public PostsResponse getSetPosts(int offset, int limit, String tagName) {
@@ -89,7 +91,7 @@ public class PostServiceByTag {
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
             List<PostComment> postComments = postCommentRepository.findAllByPost(post);
 
-            posts.add(PostMapper.converterPostByTag(post, likeCount, disLikeCount, commentCount, postComments));
+            posts.add(postMapper.converterPostByTag(post, likeCount, disLikeCount, commentCount, postComments));
         }
         return posts;
     }

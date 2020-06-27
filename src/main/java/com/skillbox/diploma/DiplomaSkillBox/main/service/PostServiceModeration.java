@@ -30,12 +30,14 @@ public class PostServiceModeration {
     private final PostRepository postRepository;
     private final PostVoteRepository postVoteRepository;
     private final PostCommentRepository postCommentRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceModeration(PostRepository postRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository) {
+    public PostServiceModeration(PostRepository postRepository, PostVoteRepository postVoteRepository, PostCommentRepository postCommentRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postVoteRepository = postVoteRepository;
         this.postCommentRepository = postCommentRepository;
+        this.postMapper = postMapper;
     }
 
     public PostsResponse getSetPosts(int offset, int limit, String status, User currentUser) {
@@ -79,7 +81,7 @@ public class PostServiceModeration {
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
 
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
         return posts;
     }

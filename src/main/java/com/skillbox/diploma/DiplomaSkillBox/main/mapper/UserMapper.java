@@ -21,7 +21,7 @@ public class UserMapper {
 
   private UserMapper(){}
 
-    public static UserIdNameResponse converterToShortName(User user) {
+    public UserIdNameResponse converterToShortName(User user) {
         UserIdNameResponse userResponse = new UserIdNameResponse();
 
         userResponse.setId(user.getId());
@@ -45,7 +45,7 @@ public class UserMapper {
         return userResponse;
     }
 
-    public static UserIdNamePhotoResponse converterToNameIdNamePhoto(User user) {
+    public UserIdNamePhotoResponse converterToNameIdNamePhoto(User user) {
         UserIdNamePhotoResponse userResponse = new UserIdNamePhotoResponse();
 
         userResponse.setId(user.getId());

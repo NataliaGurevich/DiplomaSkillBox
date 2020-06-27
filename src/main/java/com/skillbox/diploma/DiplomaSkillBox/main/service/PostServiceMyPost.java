@@ -28,13 +28,15 @@ public class PostServiceMyPost {
     private final PostCommentRepository postCommentRepository;
     private final PostVoteRepository postVoteRepository;
     private final PostUtil postUtil;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceMyPost(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, PostUtil postUtil) {
+    public PostServiceMyPost(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, PostUtil postUtil, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
         this.postUtil = postUtil;
+        this.postMapper = postMapper;
     }
 
     public PostsResponse getMyPosts(int offset, int limit, String status, User currentUser) {
@@ -108,7 +110,7 @@ public class PostServiceMyPost {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
         return posts;
     }

@@ -36,14 +36,16 @@ public class PostServiceBySearch {
     private final PostVoteRepository postVoteRepository;
     private final TagToPostRepository tagToPostRepository;
     private final EntityManager entityManager;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceBySearch(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, EntityManager entityManager) {
+    public PostServiceBySearch(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, EntityManager entityManager, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
         this.tagToPostRepository = tagToPostRepository;
         this.entityManager = entityManager;
+        this.postMapper = postMapper;
     }
 
     public PostsResponse getPostsBySearch(int offset, int limit, String querySearch) throws InterruptedException {
@@ -123,7 +125,7 @@ public class PostServiceBySearch {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
 
         return posts;

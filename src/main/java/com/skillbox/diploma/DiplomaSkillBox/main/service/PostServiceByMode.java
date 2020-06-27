@@ -32,13 +32,15 @@ public class PostServiceByMode {
     private final PostCommentRepository postCommentRepository;
     private final PostVoteRepository postVoteRepository;
     private final TagToPostRepository tagToPostRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostServiceByMode(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository) {
+    public PostServiceByMode(PostRepository postRepository, PostCommentRepository postCommentRepository, PostVoteRepository postVoteRepository, TagToPostRepository tagToPostRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postCommentRepository = postCommentRepository;
         this.postVoteRepository = postVoteRepository;
         this.tagToPostRepository = tagToPostRepository;
+        this.postMapper = postMapper;
     }
 
     public PostsResponse getSetPosts(int offset, int limit, String mode) {
@@ -160,7 +162,7 @@ public class PostServiceByMode {
             List<Tag> tags = tagToPostRepository.findByPost(post);
             List<String> tagsName = tags.stream().map(t -> t.getName()).collect(Collectors.toList());
 
-            postCommentsResponse = PostMapper.converterPostWithComment(post, likeCount,
+            postCommentsResponse = postMapper.converterPostWithComment(post, likeCount,
                     disLikeCount, commentCount, postComments, tagsName);
         }
 
@@ -174,7 +176,7 @@ public class PostServiceByMode {
             int likeCount = postVoteRepository.findCountLikes(post.getId()).orElse(0);
             int disLikeCount = postVoteRepository.findCountDislikes(post.getId()).orElse(0);
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
-            posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
+            posts.add(postMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
 
         return posts;
