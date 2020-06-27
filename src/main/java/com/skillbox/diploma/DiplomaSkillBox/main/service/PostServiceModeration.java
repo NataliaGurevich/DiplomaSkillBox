@@ -38,7 +38,7 @@ public class PostServiceModeration {
         this.postCommentRepository = postCommentRepository;
     }
 
-    public ResponseEntity<PostsResponse> getSetPosts(int offset, int limit, String status, User currentUser) {
+    public PostsResponse getSetPosts(int offset, int limit, String status, User currentUser) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -47,13 +47,11 @@ public class PostServiceModeration {
         List<Post> postList;
         long count;
 
-        if(status.equalsIgnoreCase("accepted")){
+        if (status.equalsIgnoreCase("accepted")) {
             status = "ACCEPTED";
-        }
-        else if (status.equalsIgnoreCase("declined")){
+        } else if (status.equalsIgnoreCase("declined")) {
             status = "DECLINED";
-        }
-        else {
+        } else {
             status = "NEW";
         }
 
@@ -70,7 +68,7 @@ public class PostServiceModeration {
         posts = cretePostList(postList);
 
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {
@@ -110,13 +108,12 @@ public class PostServiceModeration {
         post.setModerationStatus(moderationStatus);
         Post postEdit = postRepository.save(post);
 
-        if (postEdit != null){
+        if (postEdit != null) {
             ResponseBasic responseBasic = ResponseBasic.builder().result(true).build();
-            return new ResponseEntity (responseBasic, HttpStatus.OK);
-        }
-        else {
+            return new ResponseEntity(responseBasic, HttpStatus.OK);
+        } else {
             ResponseBasic responseBasic = ResponseBasic.builder().result(false).message("Moderation status don't edit").build();
-            return new ResponseEntity (responseBasic, HttpStatus.OK);
+            return new ResponseEntity(responseBasic, HttpStatus.OK);
         }
     }
 }

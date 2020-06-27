@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -69,6 +70,9 @@ public class TagService {
 
 
     public ResponseEntity<TagsResponse> getAllTags(String query) {
+
+        query = StringUtils.isEmpty(query) ? "" : query.trim();
+
         TagsResponse tagsResponse = new TagsResponse();
         List<TagResponse> tagsWeights = getListTags(query);
 

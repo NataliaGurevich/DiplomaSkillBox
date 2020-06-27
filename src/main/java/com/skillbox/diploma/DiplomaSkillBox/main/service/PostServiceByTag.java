@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -40,7 +38,7 @@ public class PostServiceByTag {
         this.postCommentRepository = postCommentRepository;
     }
 
-    public ResponseEntity<PostsResponse> getSetPosts(int offset, int limit, String tagName) {
+    public PostsResponse getSetPosts(int offset, int limit, String tagName) {
 
         int currentPage = offset / limit;
         Pageable paging = PageRequest.of(currentPage, limit);
@@ -79,7 +77,7 @@ public class PostServiceByTag {
             }
         }
         PostsResponse postsResponse = getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     private List<PostByTagResponse> cretePostList(List<Post> postList) {

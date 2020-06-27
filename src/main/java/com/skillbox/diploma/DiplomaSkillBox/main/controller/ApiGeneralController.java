@@ -46,8 +46,6 @@ public class ApiGeneralController {
     @RequestMapping("/tag")
     public ResponseEntity<TagsResponse> getAllTag(@RequestParam(name = "query", required = false) String query) {
 
-        query = (query == null || query.trim().length() == 0) ? "" : query.trim();
-
         return tagService.getAllTags(query);
     }
 
@@ -57,7 +55,6 @@ public class ApiGeneralController {
                                                            @CookieValue(value = "Token", defaultValue = "") String token) {
         User currentUser = authService.getCurrentUser(token);
         if (currentUser.getIsModerator()) {
-            log.info("MODERATION {}", currentUser);
             return postServiceModeration.setModeration(moderationRequest, currentUser);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
@@ -68,12 +65,7 @@ public class ApiGeneralController {
     public ResponseEntity<StatisticResponse> statisticsMy(@CookieValue(value = "Token", defaultValue = "") String token) {
         User currentUser = authService.getCurrentUser(token);
         if (currentUser != null) {
-            log.info("STATISTIC MY {}", currentUser);
             return statisticsService.myStatistics(currentUser);
-
-//        } else if (globalSettingsRepository.findSettingsValueByCode(statistics)) {
-//            return statisticsService.allStatistics();
-
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
@@ -96,11 +88,7 @@ public class ApiGeneralController {
 
         User currentUser = authService.getCurrentUser(token);
         if (currentUser != null) {
-            if (commentRequest.getText() == null || commentRequest.getText().length() < 3) {
-                return commentService.errorByComment();
-            } else {
-                return commentService.addComment(commentRequest, currentUser);
-            }
+            return new ResponseEntity<>(commentService.addCommentOrErrorByComment(commentRequest, currentUser), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }

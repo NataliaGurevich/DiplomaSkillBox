@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ public class PostServiceMyPost {
         this.postUtil = postUtil;
     }
 
-    public ResponseEntity<PostsResponse> getMyPosts(int offset, int limit, String status, User currentUser) {
+    public PostsResponse getMyPosts(int offset, int limit, String status, User currentUser) {
 
         final String INACTIVE_STATUS = "INACTIVE";
         final String PENDING_STATUS = "PENDING";
@@ -62,7 +60,6 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
         } else if (status.equalsIgnoreCase(PENDING_STATUS)) {
@@ -74,7 +71,6 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
         } else if (status.equalsIgnoreCase(DECLINED_STATUS)) {
@@ -86,7 +82,6 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
 
@@ -99,13 +94,11 @@ public class PostServiceMyPost {
             postList = postPage.stream().collect(Collectors.toList());
 
             if (postList != null) {
-//                posts = cretePostList(postList);
                 posts = postUtil.cretePostList(postList);
             }
         }
-//        PostsResponse postsResponse = getAllPostResponse(count, posts);
         PostsResponse postsResponse = postUtil.getAllPostResponse(count, posts);
-        return new ResponseEntity<>(postsResponse, HttpStatus.OK);
+        return postsResponse;
     }
 
     private List<PostResponse> cretePostList(List<Post> postList) {

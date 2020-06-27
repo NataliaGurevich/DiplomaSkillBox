@@ -29,7 +29,7 @@ public class CommentService {
         this.postRepository = postRepository;
     }
 
-    public ResponseEntity<ResponseBasic> addComment(CommentRequest commentRequest, User currentUser) {
+    public ResponseBasic addComment(CommentRequest commentRequest, User currentUser) {
 
         Long postId = commentRequest.getPostId();
         Long parentId = commentRequest.getParentId();
@@ -45,15 +45,25 @@ public class CommentService {
         postComment.setTime(Instant.now());
 
         PostComment savedComment = postCommentRepository.save(postComment);
-        return new ResponseEntity<ResponseBasic>(ResponseBasic.builder().id(savedComment.getId()).build(), HttpStatus.OK);
+        return ResponseBasic.builder().id(savedComment.getId()).build();
     }
 
-    public ResponseEntity<ResponseBasic> errorByComment() {
+    public ResponseBasic errorByComment() {
 
         String errorMessage = "Текст комментария не задан или слишком короткий";
 
         ErrorMessage error = ErrorMessage.builder().text(errorMessage).build();
         ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(error).build();
-        return new ResponseEntity(responseBasic, HttpStatus.OK);
+        return responseBasic;
     }
+
+    public ResponseBasic addCommentOrErrorByComment(CommentRequest commentRequest, User currentUser){
+
+        if (commentRequest.getText() == null || commentRequest.getText().length() < 3) {
+            return errorByComment();
+        } else {
+            return addComment(commentRequest, currentUser);
+        }
+    }
+
 }

@@ -1,14 +1,19 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.service;
 
+import com.skillbox.diploma.DiplomaSkillBox.main.mapper.UserMapper;
 import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.CaptchaRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
+import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Login;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.PasswordRestoreRequest;
 import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.*;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ErrorMessage;
+import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtTokenProvider;
 import com.skillbox.diploma.DiplomaSkillBox.main.security.jwt.JwtUserFactory;
 import lombok.Data;
@@ -24,6 +29,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -43,13 +49,18 @@ public class AuthService {
     @Value("${host}")
     private String host;
 
+    @Value("${global.settings.multiuser}")
+    private String multiuser;
+
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
     private final CaptchaRepository captchaRepository;
     private final EmailService emailService;
     private final GlobalSettingsRepository globalSettingsRepository;
+    private final UserMapper userMapper;
     private Map<String, Long> sessions;
     private Map<String, Instant> codes;
 
@@ -62,16 +73,35 @@ public class AuthService {
             "<a href=\"/auth/restore\">Запросить ссылку снова</a>";
 
     @Autowired
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager, CaptchaRepository captchaRepository, Map<String, Long> sessions, EmailService emailService, GlobalSettingsRepository globalSettingsRepository) {
+    public AuthService(UserRepository userRepository, PostRepository postRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager, CaptchaRepository captchaRepository, Map<String, Long> sessions, EmailService emailService, GlobalSettingsRepository globalSettingsRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
         this.captchaRepository = captchaRepository;
         this.emailService = emailService;
         this.globalSettingsRepository = globalSettingsRepository;
+        this.userMapper = userMapper;
         this.sessions = new HashMap<>();
         this.codes = new HashMap<>();
+    }
+
+    public AuthResponseTrue checkAuth(String token) {
+
+        User currentUser = getCurrentUser(token);
+
+        log.info("IN getCheck {}, token {}", currentUser, token);
+
+        AuthResponseTrue.AuthResponseTrueBuilder builder =
+                AuthResponseTrue.builder();
+
+        return currentUser == null ?
+                builder.result(false).build()
+                :
+                builder.result(true)
+                        .user(userMapper.converterToFullName(currentUser))
+                        .build();
     }
 
     public User login(Login login, HttpServletRequest request, HttpServletResponse response) {
@@ -111,10 +141,32 @@ public class AuthService {
         return null;
     }
 
+    public AuthResponseTrue loginBySetting(@RequestBody Login loginRequest, HttpServletRequest request, HttpServletResponse response) {
+
+        User user = userRepository.findByEmail(loginRequest.getEmail());
+        boolean isMultiUser = globalSettingsRepository.findSettingsValueByCode(multiuser);
+        boolean isModerator = user != null && user.getIsModerator();
+
+        if ((isMultiUser && user != null) || (!isMultiUser && isModerator)) {
+            User loggedUser = login(loginRequest, request, response);
+
+            AuthResponseTrue.AuthResponseTrueBuilder builder = AuthResponseTrue.builder();
+
+            AuthResponseTrue authResponse = loggedUser == null ?
+                    builder.result(false).message("Invalid email or password").build()
+                    :
+                    builder.result(true).user(userMapper.converterToFullName(loggedUser)).build();
+
+            return authResponse;
+        } else {
+            return null;
+        }
+    }
+
     public void logout(String token) {
         for (String item : sessions.keySet()) {
             if (item.equals(token))
-            sessions.remove(token);
+                sessions.remove(token);
         }
     }
 
@@ -266,8 +318,7 @@ public class AuthService {
                     .build();
             ResponseBasic responseBasic = ResponseBasic.builder().result(false).errorMessage(errorMessage).build();
             return new ResponseEntity(responseBasic, HttpStatus.OK);
-        }
-        else {
+        } else {
 
             currentUser.setPassword(bCryptPasswordEncoder.encode(password));
             userRepository.save(currentUser);

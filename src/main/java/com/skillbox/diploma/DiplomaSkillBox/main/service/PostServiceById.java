@@ -8,8 +8,6 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
@@ -69,7 +67,7 @@ public class PostServiceById {
         return postCommentsResponse;
     }
 
-    public ResponseEntity<ResponseBasic> editPostById(Long id, PostAddRequest postAddRequest, User currentUser) throws ParseException {
+    public ResponseBasic editPostById(Long id, PostAddRequest postAddRequest, User currentUser) throws ParseException {
 
         Post post = postRepository.findById(id).orElse(null);
 
@@ -105,13 +103,10 @@ public class PostServiceById {
             if (text.length() < 50) {
                 result = false;
                 isTextError = true;
-//                return new ResultResponse(false, errorText);
-
-            } if (title.length() < 3 || title.length() > 255) {
+            }
+            if (title.length() < 3 || title.length() > 255) {
                 result = false;
                 isTitleError = true;
-//                return new ResultResponse(false, errorTitle);
-
             }
             if (!result) {
                 ErrorMessage errorMessage = ErrorMessage
@@ -124,19 +119,17 @@ public class PostServiceById {
                         .result(false)
                         .errorMessage(errorMessage)
                         .build();
-                return new ResponseEntity<>(responseBasic, HttpStatus.OK);
-            }
-            else {
+                return responseBasic;
+            } else {
                 post.setIsActive(isActive);
                 post.setTitle(title);
                 post.setText(text);
-                if(post.getUser().equals(currentUser)) {
+                if (post.getUser().equals(currentUser)) {
                     post.setModerationStatus(globalSettingsRepository.findSettingsValueByCode(premoderation) ?
                             "NEW" : "ACCEPTED");
                     post.setModerator(null);
                 }
                 post.setTime(instant.isBefore(Instant.now()) ? Instant.now() : instant);
-//                post.setViewCount(0);
                 postCreated = postRepository.save(post);
 
                 log.info("NEW POST {}", postCreated);
@@ -154,19 +147,17 @@ public class PostServiceById {
                         .builder()
                         .result(true)
                         .build();
-                return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+                return responseBasic;
             }
-        }
-        else {
+        } else {
             ResponseBasic responseBasic = ResponseBasic
                     .builder()
                     .result(false)
                     .message("Post = null")
                     .build();
-            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+            return responseBasic;
         }
     }
-
 
     public Set<Tag> addTag(List<String> tagsName) {
         Set<String> currentTags = new HashSet<>(tagRepository.findAllTagName());
@@ -197,7 +188,6 @@ public class PostServiceById {
             int commentCount = postCommentRepository.findCountComments(post.getId()).orElse(0);
             posts.add(PostMapper.converter(post, likeCount, disLikeCount, commentCount));
         }
-
         return posts;
     }
 

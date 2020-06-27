@@ -7,8 +7,10 @@ import com.skillbox.diploma.DiplomaSkillBox.main.response.UserIdNameResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.UserResponse;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Data
+@Component
 public class UserMapper {
 
     @Autowired
@@ -28,7 +30,7 @@ public class UserMapper {
         return userResponse;
     }
 
-    public static UserResponse converterToFullName(User user, int count) {
+    public UserResponse converterToFullName(User user) {
         UserResponse userResponse = new UserResponse();
 
         userResponse.setId(user.getId());
@@ -37,7 +39,8 @@ public class UserMapper {
         userResponse.setEmail(user.getEmail());
         userResponse.setIsModerator(user.getIsModerator());
         userResponse.setIsSettings(user.getIsModerator());
-        userResponse.setModerationCount(count);
+        userResponse.setModerationCount(user.getIsModerator() != null && user.getIsModerator() ?
+                postRepository.findNewPosts().orElse(0) : 0);
 
         return userResponse;
     }

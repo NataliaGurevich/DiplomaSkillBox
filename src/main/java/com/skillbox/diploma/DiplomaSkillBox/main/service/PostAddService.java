@@ -12,8 +12,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -55,14 +53,13 @@ public class PostAddService {
         this.globalSettingsRepository = globalSettingsRepository;
     }
 
-    public ResponseEntity<ResponseBasic> addNewPost(PostAddRequest postAddRequest, String token) throws ParseException {
+    public ResponseBasic addNewPost(PostAddRequest postAddRequest, String token) throws ParseException {
 
         final String errorTitle = "Заголовок не установлен";
         final String errorText = "Текст публикации слишком короткий";
 
         boolean isTextError = false;
         boolean isTitleError = false;
-        boolean isUserError = false;
         boolean result = true;
 
         Post postCreated;
@@ -81,23 +78,20 @@ public class PostAddService {
         if (text.length() < 50) {
             result = false;
             isTextError = true;
-//            return new ResultResponse(false, errorText);
-
-        } if (title.length() < 3 || title.length() > 255) {
+        }
+        if (title.length() < 3 || title.length() > 255) {
             result = false;
             isTitleError = true;
-//            return new ResultResponse(false, errorTitle);
-
-        } if (currentUser == null) {
-//            return new ResultResponse(false, "Current user = NULL");
+        }
+        if (currentUser == null) {
             ResponseBasic responseBasic = ResponseBasic
                     .builder()
                     .result(false)
                     .build();
-            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+            return responseBasic;
 
         }
-        if (!result){
+        if (!result) {
             ErrorMessage errorMessage = ErrorMessage
                     .builder()
                     .text(isTextError ? errorText : null)
@@ -108,7 +102,7 @@ public class PostAddService {
                     .result(false)
                     .errorMessage(errorMessage)
                     .build();
-            return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+            return responseBasic;
         } else {
             Post post = new Post();
             post.setIsActive(isActive);
@@ -141,7 +135,7 @@ public class PostAddService {
                 .builder()
                 .result(true)
                 .build();
-        return new ResponseEntity<>(responseBasic, HttpStatus.OK);
+        return responseBasic;
     }
 
     public Set<Tag> addTag(List<String> tagsName) {

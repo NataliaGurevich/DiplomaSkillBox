@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Calendar;
 
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -33,9 +32,6 @@ public class DefaultController {
     private final InitializeResponse init;
     private final FileUploadService fileUploadService;
     private final ProfileService profileService;
-
-    private Calendar calendar = Calendar.getInstance();
-    private String currentYear = Integer.toString(calendar.get(Calendar.YEAR));
 
     @Autowired
     public DefaultController(GlobalSettingsService globalSettingsService, AuthService authService, CalendarService calendarService, PostServiceByMode postServiceByMode, InitializeResponse init, FileUploadService fileUploadService, ProfileService profileService) {
@@ -61,7 +57,8 @@ public class DefaultController {
 
     @RequestMapping(value = "/api/settings", method = RequestMethod.GET)
     public ResponseEntity<GlobalSettingsResponse> settingsGet() {
-        return globalSettingsService.globalSettingsResponse();
+
+        return new ResponseEntity<>(globalSettingsService.setGlobalSettings(), OK);
     }
 
     @RequestMapping(value = "/api/settings", method = RequestMethod.PUT)
@@ -74,29 +71,16 @@ public class DefaultController {
 
         if (currentUser != null && currentUser.getIsModerator()) {
 
-            GlobalSettingsResponse globalSettingsResponse = new GlobalSettingsResponse();
-            globalSettingsResponse.setMULTIUSER_MODE(globalSettingsRequest.isMULTIUSER_MODE());
-            globalSettingsResponse.setPOST_PREMODERATION(globalSettingsRequest.isPOST_PREMODERATION());
-            globalSettingsResponse.setSTATISTICS_IS_PUBLIC(globalSettingsRequest.isSTATISTICS_IS_PUBLIC());
-
-            globalSettingsService.saveGlobalSettings(globalSettingsRequest);
-
-            return new ResponseEntity<>(globalSettingsResponse, OK);
+            return new ResponseEntity<>(globalSettingsService.setGlobalSettings(globalSettingsRequest), OK);
         }
 
-        return globalSettingsService.globalSettingsResponse();
+        return new ResponseEntity<>(globalSettingsService.setGlobalSettings(), OK);
     }
 
     @RequestMapping(value = "/api/calendar{year}", method = RequestMethod.GET)
     public ResponseEntity<CalendarResponse> calendar(@PathVariable String year) {
-        try {
-            year = (year == null || Integer.parseInt(year) > Integer.parseInt(currentYear) || year.length() < 4) ?
-                    currentYear : year;
-        } catch (NumberFormatException ex) {
-            year = currentYear;
-        }
 
-        return calendarService.postsPerDate(year);
+        return new ResponseEntity<>(calendarService.postsPerDate(year), OK);
     }
 
     @RequestMapping(value = "/login/change-password/{code}", method = RequestMethod.GET)
@@ -129,13 +113,8 @@ public class DefaultController {
 
         User currentUser = authService.getCurrentUser(token);
 
-        log.info("PROFILE  file {}", photo.getOriginalFilename());
-        log.info("PROFILE  name {}", name);
-        log.info("PROFILE  email {}", email);
-        log.info("PROFILE  password {}", password);
-        log.info("PROFILE  removePhoto {}", removePhoto);
         if (currentUser != null) {
-            return (profileService.changeProfile(photo, name, email, password, removePhoto, currentUser));
+            return new ResponseEntity<>(profileService.changeProfile(photo, name, email, password, removePhoto, currentUser), OK);
         }
         return new ResponseEntity<>(null, UNAUTHORIZED);
     }
@@ -146,13 +125,8 @@ public class DefaultController {
 
         User currentUser = authService.getCurrentUser(token);
 
-        log.info("PROFILE  name {}", profileRequest.getName());
-        log.info("PROFILE  email {}", profileRequest.getEmail());
-        log.info("PROFILE  password {}", profileRequest.getPassword());
-        log.info("PROFILE  removePhoto {}", profileRequest.getRemovePhoto());
-
         if (currentUser != null) {
-            return (profileService.changeProfile(profileRequest, currentUser));
+            return new ResponseEntity<>(profileService.changeProfile(profileRequest, currentUser), OK);
         }
         return new ResponseEntity<>(null, UNAUTHORIZED);
     }

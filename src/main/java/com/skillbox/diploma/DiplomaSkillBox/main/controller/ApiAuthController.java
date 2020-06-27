@@ -1,7 +1,6 @@
 package com.skillbox.diploma.DiplomaSkillBox.main.controller;
 
 import com.skillbox.diploma.DiplomaSkillBox.main.mapper.UserMapper;
-import com.skillbox.diploma.DiplomaSkillBox.main.model.User;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.GlobalSettingsRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.PostRepository;
 import com.skillbox.diploma.DiplomaSkillBox.main.repository.UserRepository;
@@ -12,7 +11,6 @@ import com.skillbox.diploma.DiplomaSkillBox.main.request.Registration;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.AuthResponseTrue;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.CaptchaResponse;
 import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasic;
-import com.skillbox.diploma.DiplomaSkillBox.main.response.ResponseBasicResult;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.AuthService;
 import com.skillbox.diploma.DiplomaSkillBox.main.service.CaptchaService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,59 +36,37 @@ public class ApiAuthController {
     private final GlobalSettingsRepository globalSettingsRepository;
     private final UserRepository userRepository;
     private final CaptchaService captchaService;
+    private final UserMapper userMapper;
 
     @Value("${global.settings.multiuser}")
     private String multiuser;
 
     @Autowired
-    public ApiAuthController(AuthService authService, PostRepository postRepository, GlobalSettingsRepository globalSettingsRepository, UserRepository userRepository, CaptchaService captchaService) {
+    public ApiAuthController(AuthService authService, PostRepository postRepository, GlobalSettingsRepository globalSettingsRepository, UserRepository userRepository, CaptchaService captchaService, UserMapper userMapper) {
         this.authService = authService;
         this.postRepository = postRepository;
         this.globalSettingsRepository = globalSettingsRepository;
         this.userRepository = userRepository;
         this.captchaService = captchaService;
+        this.userMapper = userMapper;
     }
 
     @GetMapping("/check")
-    public ResponseEntity<ResponseBasicResult> getCheck(@CookieValue(value = "Token", defaultValue = "") String token) {
+    public ResponseEntity<AuthResponseTrue> getCheck(@CookieValue(value = "Token", defaultValue = "") String token) {
 
-        User currentUser = authService.getCurrentUser(token);
-
-        log.info("IN getCheck {}, token {}", currentUser, token);
-
-        AuthResponseTrue.AuthResponseTrueBuilder builder = AuthResponseTrue.builder();
-
-        AuthResponseTrue authResponse = currentUser == null ?
-                builder.result(false).build()
-                :
-                AuthResponseTrue.builder().user(UserMapper.converterToFullName(currentUser, currentUser.getIsModerator() ? postRepository.findNewPosts().orElse(0) : 0)).build();
-
-        return new ResponseEntity<>(authResponse, OK);
+        return new ResponseEntity<>(authService.checkAuth(token), OK);
 
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseBasicResult> login(@RequestBody Login loginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseTrue> login(@RequestBody Login loginRequest, HttpServletRequest request, HttpServletResponse response) {
 
-        User user = userRepository.findByEmail(loginRequest.getEmail());
-        boolean isMultiUser = globalSettingsRepository.findSettingsValueByCode(multiuser);
-        boolean isModerator = user != null && user.getIsModerator();
+        AuthResponseTrue authResponse = authService.loginBySetting(loginRequest, request, response);
 
-        if ((isMultiUser && user != null) || (!isMultiUser && isModerator)) {
-            User loggedUser = authService.login(loginRequest, request, response);
-
-            AuthResponseTrue.AuthResponseTrueBuilder builder = AuthResponseTrue.builder();
-
-            AuthResponseTrue authResponse = loggedUser == null ?
-                    builder.result(false).message("Invalid email or password").build()
-                    :
-                    builder.user(UserMapper.converterToFullName(loggedUser, loggedUser.getIsModerator() ? postRepository.findNewPosts().orElse(0) : 0)).build();
-
-            return new ResponseEntity<>(authResponse, OK);
-
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+        return authResponse != null ?
+                new ResponseEntity<>(authResponse, OK)
+                :
+                new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/register")
