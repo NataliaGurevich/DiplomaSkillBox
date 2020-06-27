@@ -1,1 +1,1 @@
-web: java -jar target/DiplomaSkillBox-1.6.jar
+web: java -jar target/DiplomaSkillBox-1.7.jar
